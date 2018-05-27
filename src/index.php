@@ -59,6 +59,36 @@ $app = new \Slim\App([
 	}
 ]);
 
+// CORS
+$app->options('/{routes:.+}', function ($request, $response, $args) {
+	return $response;
+});
+$app->add(function ($req, $res, $next) {
+	$response = $next($req, $res);
+	return $response
+		->withHeader('Access-Control-Allow-Origin', '*')
+		->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+		->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+});
+
+// REGISTRATION ENDPOINT
+$app->post( '/register',
+	function( Request $request, Response $response ) use ( $app ) {
+		$obj = new stdClass();
+		$obj->email = $request->getParam('email');
+		$obj->pass = $request->getParam('pass'); // TODO: DO NOT SAVE THIS
+		$obj->name = $request->getParam('name');
+		$obj->role = $request->getParam('role');
+		$obj->salt = $request->getParam('salt');
+		$obj->hash = $request->getParam('hash');
+		// $output = $this->db->newPlayer( $obj ); // table,filter,object
+		$response = $response->withHeader( 'Content-type', 'application/json' );
+		$response = $response->withJson( $obj );
+		return $response;
+	}
+);
+
+
 // TESTING
 // TODO: remove this
 $app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
@@ -66,24 +96,5 @@ $app->get('/hello/{name}', function (Request $request, Response $response, array
 	$response->getBody()->write("Hello, $name");
 	return $response;
 });
-
-// REGISTRATION ENDPOINT
-$app->post( '/register',
-	function( Request $request, Response $response ) use ( $app ) {
-		$obj = new stdClass();
-		$obj->salt = $request->getParam('salt');
-		$obj->hash = $request->getParam('hash');
-		$obj->email = $request->getParam('email');
-		$obj->pass = $request->getParam('pass'); // TODO: DO NOT SAVE THIS
-		$obj->name = $request->getParam('name');
-		$obj->role = $request->getParam('role');
-		// $obj->salt = hash( 'md5', rand() );
-		// $obj->hash = hash( 'sha256', $request->getParam('pass') . $obj->salt );
-		// $output = $this->db->newPlayer( $obj ); // table,filter,object
-		$response = $response->withHeader( 'Content-type', 'application/json' );
-		$response = $response->withJson( $obj );
-		return $response;
-	}
-);
 
 $app->run();
