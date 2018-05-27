@@ -56,7 +56,7 @@ Visit http://localhost/info.php and https://localhost/info.php
 
 ### Install Composer / Slim framework
 #### Get into the container:
-`docker exec -it mrct /bin/bash`
+`docker exec -it mrct /bin/bash`  
 #### Download Composer:
 ```
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -65,14 +65,15 @@ php composer-setup.php
 php -r "unlink('composer-setup.php');"
 ```
 #### Compose:
-`cd /var/www/html`
+`cd /var/www/html`  
 ##### Install Slim
-`composer require slim/slim "^3.0"`
+`composer require slim/slim "^3.0"`  
 ##### Install OAuth2
-`composer require league/oauth2-server`
+`composer require league/oauth2-server`  
 ###### Follow instructions here on generating keys:
 https://oauth2.thephpleague.com/installation/  
-`openssl genrsa -out private.key 2048`
-`openssl rsa -in private.key -pubout -out public.key`
+`openssl genrsa -out private.key 2048`  
+`openssl rsa -in private.key -pubout -out public.key`  
+
 
 ## Step 2
