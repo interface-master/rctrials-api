@@ -1,12 +1,16 @@
-DROP TABLE `users`;
+DROP TABLE IF EXISTS `users`;
 
 CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `first_name` varchar(100) NOT NULL,
-  `last_name` varchar(100) NOT NULL,
-  `notes` text,
-  PRIMARY KEY (`id`)
+	`id` VARCHAR(36) NOT NULL,
+	`salt` VARCHAR(100) NOT NULL,
+	`hash` VARCHAR(100) NOT NULL,
+	`email` VARCHAR(100) NOT NULL,
+	`pass` VARCHAR(100) NOT NULL,
+	`name` VARCHAR(100) NOT NULL,
+	`role` ENUM('root','admin','user'),
+	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `users` (`first_name`, `last_name`, `notes`)
-  VALUES ('John', 'Smith', 'Hello world. Lorem ipsum!');
+INSERT INTO `users` (`id`,`salt`,`hash`,`email`,`pass`,`name`,`role`) VALUES
+	( UUID(), '..salt..', '..hash..', 'interface-master@gmail.com', 'abc', 'Interface Master', 'root' ),
+	( UUID(), '..salt..', '..hash..', 'john@smith.ca', 'Passw0rd', 'John Smith', 'admin' );
