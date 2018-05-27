@@ -70,6 +70,8 @@ php -r "unlink('composer-setup.php');"
 `composer require slim/slim "^3.0"`
 ##### Install OAuth2
 `composer require league/oauth2-server`
+###### Follow instructions here on generating keys:
+https://oauth2.thephpleague.com/installation/  
 
 
 ## Step 2
