@@ -4,7 +4,7 @@ Back End API for the Mobile RCT Platform
 
 # Setup
 
-## Step 1
+## Step 1 - API
 
 ### For LAMP configuration, acquire Apache, PHP, and MySQL images:
 `docker pull nimmis/apache-php7`  
@@ -76,4 +76,13 @@ https://oauth2.thephpleague.com/installation/
 `openssl rsa -in private.key -pubout -out public.key`  
 
 
-## Step 2
+## Step 2 - WebApp
+
+### Install Angular CLI:
+https://angular.io/guide/quickstart  
+`npm install -g @angular/cli`  
+
+### Create new project:
+`ng new mrct`
+#### Move files into root of git repo:
+`cd mrct && mv * ../ && cd .. && rm -rf mrct`
