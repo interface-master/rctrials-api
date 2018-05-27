@@ -51,9 +51,25 @@ OR
 _share a mount volume to point directly to /var/www/html_  
 `docker run -ti --name=mrct -v ~/Programming/mrct-api/src:/var/www/html -p 80:80 -p 443:443 --link mysql56:mysql -d lamp`  
 
-
 #### Sanity check:
 Visit http://localhost/info.php and https://localhost/info.php  
+
+### Install Composer / Slim framework
+#### Get into the container:
+`docker exec -it mrct /bin/bash`
+#### Download Composer:
+```
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php -r "if (hash_file('SHA384', 'composer-setup.php') === '544e09ee996cdf60ece3804abc52599c22b1f40f4323403c44d44fdfdd586475ca9813a858088ffbc1f233e9b180f061') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+php composer-setup.php
+php -r "unlink('composer-setup.php');"
+```
+#### Compose:
+`cd /var/www/html`
+##### Install Slim
+`composer require slim/slim "^3.0"`
+##### Install OAuth2
+`composer require league/oauth2-server`
 
 
 ## Step 2
