@@ -69,7 +69,7 @@ $app->get('/hello/{name}', function (Request $request, Response $response, array
 
 // REGISTRATION ENDPOINT
 $app->post( '/register',
-	function( ServerRequestInterface $request, ResponseInterface $response ) use ( $app ) {
+	function( Request $request, Response $response ) use ( $app ) {
 		$obj = new stdClass();
 		$obj->salt = $request->getParam('salt');
 		$obj->hash = $request->getParam('hash');
