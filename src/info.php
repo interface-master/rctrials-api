@@ -37,7 +37,7 @@
 
   // output
   while ( $row = $stmt->fetch() ) {
-      echo $row['id'] . ": " . $row['first_name'] . " " . $row['last_name'] . "\n";
+      echo "<b>" . $row['id'] . "</b>: " . $row['first_name'] . " " . $row['last_name'] . "\n";
   }
 
 ?>
