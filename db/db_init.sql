@@ -11,6 +11,6 @@ CREATE TABLE `users` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `users` (`id`,`salt`,`hash`,`email`,`pass`,`name`,`role`) VALUES
-	( UUID(), '..salt..', '..hash..', 'interface-master@gmail.com', 'abc', 'Interface Master', 'root' ),
-	( UUID(), '..salt..', '..hash..', 'john@smith.ca', 'Passw0rd', 'John Smith', 'admin' );
+-- INSERT INTO `users` (`id`,`salt`,`hash`,`email`,`pass`,`name`,`role`) VALUES
+-- 	( UUID(), '..salt..', '..hash..', 'interface.master@gmail.com', 'abc', 'Interface Master', 'root' ),
+-- 	( UUID(), '..salt..', '..hash..', 'john@smith.ca', 'Passw0rd', 'John Smith', 'admin' );

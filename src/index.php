@@ -1,4 +1,7 @@
 <?php
+
+require './vendor/autoload.php';
+
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
@@ -10,9 +13,11 @@ use League\OAuth2\Server\Grant\PasswordGrant;
 use League\OAuth2\Server\Middleware\AuthorizationServerMiddleware;
 use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
 
-require './vendor/autoload.php';
+include_once( __DIR__ . '/utils/DatabaseManager.php' );
+use PS\DatabaseManager;
 
 DEFINE( 'PATH_RSA_KEYS', 'file://'.__DIR__.'/../keys/' );
+
 
 $app = new \Slim\App([
 	'settings' => [
@@ -59,6 +64,12 @@ $app = new \Slim\App([
 	}
 ]);
 
+// get container
+$container = $app->getContainer();
+// set up us the database
+$container['db'] = new DatabaseManager(); // host,port,db,usr,pass
+
+
 // CORS
 $app->options('/{routes:.+}', function ($request, $response, $args) {
 	return $response;
@@ -74,16 +85,18 @@ $app->add(function ($req, $res, $next) {
 // REGISTRATION ENDPOINT
 $app->post( '/register',
 	function( Request $request, Response $response ) use ( $app ) {
-		$obj = new stdClass();
+		$obj = new \stdClass();
 		$obj->email = $request->getParam('email');
 		$obj->pass = $request->getParam('pass'); // TODO: DO NOT SAVE THIS
 		$obj->name = $request->getParam('name');
 		$obj->role = $request->getParam('role');
 		$obj->salt = $request->getParam('salt');
 		$obj->hash = $request->getParam('hash');
-		// $output = $this->db->newPlayer( $obj ); // table,filter,object
+		// check if email exists
+		$output = $this->db->newPlayer( $obj );
+		// output
 		$response = $response->withHeader( 'Content-type', 'application/json' );
-		$response = $response->withJson( $obj );
+		$response = $response->withJson( $output );
 		return $response;
 	}
 );
@@ -91,10 +104,16 @@ $app->post( '/register',
 
 // TESTING
 // TODO: remove this
-$app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
-	$name = $args['name'];
-	$response->getBody()->write("Hello, $name");
-	return $response;
-});
+// $app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
+// 	$name = $args['name'];
+//
+// 	$output = $this->db->getCursor();
+//
+// 	// $response = $response->withHeader( 'Content-type', 'application/json' );
+// 	// $response = $response->withJson( $output );
+//
+// 	$response->getBody()->write("Hello, $name");
+// 	return $response;
+// });
 
 $app->run();
