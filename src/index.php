@@ -13,8 +13,13 @@ use League\OAuth2\Server\Grant\PasswordGrant;
 use League\OAuth2\Server\Middleware\AuthorizationServerMiddleware;
 use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
 
-include_once( __DIR__ . '/utils/DatabaseManager.php' );
-use PS\DatabaseManager;
+use MRCT\Repositories\ClientRepository;
+use MRCT\Repositories\AccessTokenRepository;
+use MRCT\Repositories\ScopeRepository;
+use MRCT\Repositories\UserRepository;
+use MRCT\Repositories\RefreshTokenRepository;
+
+use MRCT\DatabaseManager;
 
 DEFINE( 'PATH_RSA_KEYS', 'file://'.__DIR__.'/../keys/' );
 
@@ -67,7 +72,7 @@ $app = new \Slim\App([
 // get container
 $container = $app->getContainer();
 // set up us the database
-$container['db'] = new DatabaseManager(); // host,port,db,usr,pass
+$container['db'] = DatabaseManager::getInstance();
 
 
 // CORS
@@ -101,19 +106,77 @@ $app->post( '/register',
 	}
 );
 
+$app->post( '/validate/email',
+	function( Request $request, Response $response ) use ( $app ) {
+		$output = new \stdClass();
+		$email = $request->getParam('username');
+		$user = $this->db->getUserByEmail( $email );
+		if( isset($user) ) {
+			$output = array(
+				'salt' => $user->salt
+			);
+		}
+		$response = $response->withHeader( 'Content-type', 'application/json' );
+		$response = $response->withJson( $output );
+		return $response;
+	}
+);
+
+$app->post( '/validate/login',
+	function( Request $request, Response $response ) use ( $app ) {
+		$server = $app->getContainer()->get(AuthorizationServer::class);
+		try {
+			$output = new \stdClass();
+			$email = $request->getParam('username');
+			$hash = $request->getParam('password');
+			$user = $this->db->getUserByLogin( $email, $hash );
+			if( isset($user) ) {
+				$resp = $server->respondToAccessTokenRequest($request, $response);
+				$respjson = array();
+				if( isset($resp) ) {
+					// get response body
+					$respbody = $resp->getBody();
+					$respbody->rewind();
+					$respjson = json_decode( $respbody->getContents() );
+					// modify response with user info
+					$respjson->id = $user->id;
+					$respjson->name = $user->name;
+					$respjson->role = $user->role;
+				}
+			} else {
+				$respjson = array(
+					'error' => "incorrect_login",
+					'message' => "Username or Password is incorrect"
+				);
+			}
+			$response = $response->withHeader( 'Content-type', 'application/json' );
+			$response = $response->withJson( $respjson );
+			return $response;
+		} catch (OAuthServerException $exception) {
+			// All instances of OAuthServerException can be converted to a PSR-7 response
+			return $exception->generateHttpResponse($response);
+		} catch (\Exception $exception) {
+			// Catch unexpected exceptions
+			$body = $response->getBody();
+			$body->write( $exception->getMessage() );
+			return $response->withStatus(500)->withBody( $body );
+		}
+	}
+);
+
 
 // TESTING
 // TODO: remove this
-// $app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
-// 	$name = $args['name'];
-//
-// 	$output = $this->db->getCursor();
-//
-// 	// $response = $response->withHeader( 'Content-type', 'application/json' );
-// 	// $response = $response->withJson( $output );
-//
-// 	$response->getBody()->write("Hello, $name");
-// 	return $response;
-// });
+$app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
+	$name = $args['name'];
+
+	// $output = $this->db->getCursor();
+
+	// $response = $response->withHeader( 'Content-type', 'application/json' );
+	// $response = $response->withJson( $output );
+
+	$response->getBody()->write("Hello, $name");
+	return $response;
+})->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
 
 $app->run();
