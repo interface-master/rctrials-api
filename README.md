@@ -46,10 +46,12 @@ _share a mount volume and copy files into container_
 `docker exec -it mrct /bin/bash`  
 #### Copy files to container:
 `cp -R /mnt/media/src/. /var/www/html/`  
+`cp -R /mnt/media/keys/. /var/www/keys/`  
+`chmod 755 /var/www/keys && chmod 600 /var/www/keys/private.key /var/www/keys/public.key`
 
 OR  
 _share a mount volume to point directly to /var/www/html_  
-`docker run -ti --name=mrct -v ~/Programming/mrct-api/src:/var/www/html -p 80:80 -p 443:443 --link mysql56:mysql -d lamp`  
+`docker run -ti --name=mrct -v ~/Programming/mrct-api/src:/var/www/html -v ~/Programming/mrct-api/keys:/var/www/keys -p 80:80 -p 443:443 --link mysql56:mysql -d lamp`  
 
 #### Sanity check:
 Visit http://localhost/info.php and https://localhost/info.php  
@@ -74,6 +76,22 @@ php -r "unlink('composer-setup.php');"
 https://oauth2.thephpleague.com/installation/  
 `openssl genrsa -out private.key 2048`  
 `openssl rsa -in private.key -pubout -out public.key`  
+
+### Add personal Classes
+#### Update composer.json
+Update `composer.json` to include the following object:
+```
+{
+  "autoload": {
+    "psr-4": {
+      "NAMESPACE\\": "dir/"
+    }
+  }
+}
+```
+#### Regenerate autoload files
+`composer dump-autoload`
+
 
 
 ## Step 2 - WebApp
