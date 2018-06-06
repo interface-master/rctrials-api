@@ -36,7 +36,7 @@ class DatabaseManager {
 		$ret = new \stdClass();
 		// check if email exists
 		$cursor = $this->getUserByEmail( $obj->email );
-		if( sizeof($cursor) > 0 ) {
+		if( isset($cursor) ) {
 			$ret->status = 500;
 			$ret->message = 'Email already exists';
 			return $ret;
@@ -59,7 +59,7 @@ class DatabaseManager {
 			// get id
 			// TODO: this is possibly unnecessary, isn't used by the FE yet
 			$user = $this->getUserByEmail( $obj->email );
-			$ret->id = $user[0]->id;
+			$ret->id = $user->id;
 		} catch( PDOException $e ) {
 			$ret->status = $e->getCode();
 			$ret->message = $e->getMessage();
@@ -76,7 +76,7 @@ class DatabaseManager {
 		$stmt->bindParam( ':email', $email );
 		$stmt->execute();
 		$rows = $stmt->fetch(\PDO::FETCH_OBJ);
-		if( sizeof($rows) > 0 ) {
+		if( isset($rows) ) {
 			return $rows;
 		} else {
 			return null;
