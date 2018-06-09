@@ -111,7 +111,7 @@ $app->post( '/validate/email',
 		$output = new \stdClass();
 		$email = $request->getParam('username');
 		$user = $this->db->getUserByEmail( $email );
-		if( isset($user) ) {
+		if( $user !== false ) {
 			$output = array(
 				'salt' => $user->salt
 			);
@@ -130,10 +130,10 @@ $app->post( '/validate/login',
 			$email = $request->getParam('username');
 			$hash = $request->getParam('password');
 			$user = $this->db->getUserByLogin( $email, $hash );
-			if( isset($user) ) {
+			if( $user !== false ) {
 				$resp = $server->respondToAccessTokenRequest($request, $response);
 				$respjson = array();
-				if( isset($resp) ) {
+				if( $resp !== false ) {
 					// get response body
 					$respbody = $resp->getBody();
 					$respbody->rewind();
