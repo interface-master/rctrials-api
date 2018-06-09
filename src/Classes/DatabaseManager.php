@@ -36,7 +36,7 @@ class DatabaseManager {
 		$ret = new \stdClass();
 		// check if email exists
 		$cursor = $this->getUserByEmail( $obj->email );
-		if( isset($cursor) ) {
+		if( $cursor !== false ) {
 			$ret->status = 500;
 			$ret->message = 'Email already exists';
 			return $ret;
@@ -76,7 +76,7 @@ class DatabaseManager {
 		$stmt->bindParam( ':email', $email );
 		$stmt->execute();
 		$rows = $stmt->fetch(\PDO::FETCH_OBJ);
-		if( isset($rows) ) {
+		if( $rows !== false ) {
 			return $rows;
 		} else {
 			return null;
