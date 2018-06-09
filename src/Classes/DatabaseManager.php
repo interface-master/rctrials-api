@@ -36,7 +36,7 @@ class DatabaseManager {
 		$ret = new \stdClass();
 		// check if email exists
 		$cursor = $this->getUserByEmail( $obj->email );
-		if( $cursor !== false ) {
+		if( isset($cursor) ) {
 			$ret->status = 500;
 			$ret->message = 'Email already exists';
 			return $ret;
