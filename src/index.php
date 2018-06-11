@@ -165,6 +165,27 @@ $app->post( '/validate/login',
 );
 
 
+// USER INFO
+$app->get( '/user/details',
+	function( Request $request, Response $response ) use ( $app ) {
+		// $uid = $this->db->getUserFromAuth( $request->getHeader('authorization') );
+		$output = new \stdClass();
+		$user = $this->db->getUserByAuth( $request->getAttribute('oauth_access_token_id') );
+		if( $user !== false ) {
+			$output = array(
+				'uid' => $user->uid,
+				'email' => $user->email,
+				'name' => $user->name,
+				'role' => $user->role
+			);
+		}
+		$response = $response->withHeader( 'Content-type', 'application/json' );
+		$response = $response->withJson( $output );
+		return $response;
+	}
+)->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
+
+
 // TESTING
 // TODO: remove this
 $app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
