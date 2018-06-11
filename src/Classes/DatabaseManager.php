@@ -142,7 +142,10 @@ class DatabaseManager {
 				'token' => $obj->access_token, // TODO: don't save this - use `tid` instead
 				'expires' => $obj->date_expires
 			),
-			"ON DUPLICATE KEY UPDATE `token`=:token, `expires`=:expires"
+			"ON DUPLICATE KEY UPDATE
+				`tid`=:tid,
+				`token`=:token,
+				`expires`=:expires"
 		);
 		// return $obj->access_token;
 	}
