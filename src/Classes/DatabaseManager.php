@@ -79,7 +79,7 @@ class DatabaseManager {
 		if( $rows !== false ) {
 			return $rows;
 		} else {
-			return null;
+			return false;
 		}
 	}
 
@@ -97,10 +97,36 @@ class DatabaseManager {
 		if( $rows !== false ) {
 			return $rows;
 		} else {
-			return null;
+			return false;
 		}
 	}
 
+	/**
+	 * Check `users` table by `tid` from Authorization
+	 */
+	public function getUserByAuth( $token ) {
+		$stmt = $this->dbh->prepare(
+			"SELECT
+				u.id AS uid,
+				u.email,
+				u.name,
+				u.role
+			FROM
+				users AS u
+			INNER JOIN
+				tokens AS t
+				ON (t.uid = u.id)
+			WHERE
+				t.tid=:tid");
+		$stmt->bindParam( ':tid', $token );
+		$stmt->execute();
+		$rows = $stmt->fetch(\PDO::FETCH_OBJ);
+		if( $rows !== false ) {
+			return $rows;
+		} else {
+			return false;
+		}
+	}
 
 	/**
 	 *
@@ -108,11 +134,12 @@ class DatabaseManager {
 	public function saveToken( $obj ) {
 		$insert = $this->insertRecords(
 			'tokens',
-			"(`uid`,`token`,`expires`)",
-			"( :uid, :token, :expires )",
+			"(`uid`,`tid`,`token`,`expires`)",
+			"( :uid, :tid, :token, :expires )",
 			array(
 				'uid' => $obj->uid,
-				'token' => $obj->access_token,
+				'tid' => $obj->tid,
+				'token' => $obj->access_token, // TODO: don't save this - use `tid` instead
 				'expires' => $obj->date_expires
 			),
 			"ON DUPLICATE KEY UPDATE `token`=:token, `expires`=:expires"
