@@ -17,7 +17,8 @@ CREATE TABLE `users` (
 
 CREATE TABLE `tokens` (
 	`uid` VARCHAR(36) NOT NULL,
-	`token` TEXT NOT NULL,
+	`tid` TEXT,
+	`token` TEXT,
 	`expires` DATETIME NOT NULL,
 	PRIMARY KEY (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
