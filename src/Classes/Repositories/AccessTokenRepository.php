@@ -47,6 +47,13 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface {
 	 * {@inheritdoc}
 	 */
 	public function isAccessTokenRevoked($tokenId) {
+		// look up token in db
+		$db = DatabaseManager::getInstance();
+		$user = $db->getUserByAuth( $tokenId );
+		if( $user == false ) {
+			return true; // Access token is revoked
+		}
+		// else return false
 		return false; // Access token hasn't been revoked
 	}
 	/**
