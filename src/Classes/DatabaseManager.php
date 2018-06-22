@@ -60,6 +60,7 @@ class DatabaseManager {
 			// TODO: this is possibly unnecessary, isn't used by the FE yet
 			$user = $this->getUserByEmail( $obj->email );
 			$ret->id = $user->id;
+			$ret->status = 200;
 		} catch( PDOException $e ) {
 			$ret->status = $e->getCode();
 			$ret->message = $e->getMessage();
