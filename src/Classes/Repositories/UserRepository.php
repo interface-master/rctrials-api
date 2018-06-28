@@ -35,8 +35,10 @@ class UserRepository implements UserRepositoryInterface
 		$record = $db->getUserByLogin( $obj->email, $obj->hash );
 		// $record = $db->getValue( 'players', ['email'=>$obj->email, 'hash'=>$obj->hash], [] );
 
-		if( isset($record) ) {
+		if( $record !== false ) {
 			return new UserEntity( $record->id );
+		} else {
+			return false;
 		}
 
 		// $obj->access_token = $tokenJWT->__toString(); // this is the token that's sent back to the user
