@@ -77,17 +77,16 @@ class DatabaseManager {
 		$stmt->bindParam( ':email', $email );
 		$stmt->execute();
 		$rows = $stmt->fetch(\PDO::FETCH_OBJ);
-		if( $rows !== false ) {
-			return $rows;
-		} else {
-			return false;
-		}
+		return $rows;
 	}
 
 	/**
 	 * Check `users` table by email and hash
 	 */
-	public function getUserByLogin( $email, $hash ) {
+	public function getUserByLogin( $request ) {
+		$email = $request->getParam('username');
+		$hash = $request->getParam('password');
+		$refresh = $request->getParam('request_token');
 		$stmt = $this->dbh->prepare(
 			"SELECT * FROM `users`
 			WHERE `email`=:email AND `hash`=:hash");
@@ -95,11 +94,7 @@ class DatabaseManager {
 		$stmt->bindParam( ':hash', $hash );
 		$stmt->execute();
 		$rows = $stmt->fetch(\PDO::FETCH_OBJ);
-		if( $rows !== false ) {
-			return $rows;
-		} else {
-			return false;
-		}
+		return $rows;
 	}
 
 	/**
@@ -122,11 +117,7 @@ class DatabaseManager {
 		$stmt->bindParam( ':tid', $token );
 		$stmt->execute();
 		$rows = $stmt->fetch(\PDO::FETCH_OBJ);
-		if( $rows !== false ) {
-			return $rows;
-		} else {
-			return false;
-		}
+		return $rows;
 	}
 
 	/**
