@@ -141,35 +141,12 @@ $app->post( '/validate/login',
 	function( Request $request, Response $response ) use ( $app ) {
 		$server = $app->getContainer()->get(AuthorizationServer::class);
 		try {
-			$output = new \stdClass();
-			$email = $request->getParam('username');
-			$hash = $request->getParam('password');
-			$user = $this->db->getUserByLogin( $email, $hash );
-			if( $user !== false ) {
-				$resp = $server->respondToAccessTokenRequest($request, $response);
-				$respjson = array();
-				if( $resp !== false ) {
-					// get response body
-					$respbody = $resp->getBody();
-					$respbody->rewind();
-					$respjson = json_decode( $respbody->getContents() );
-					// modify response with user info
-					$respjson->id = $user->id;
-					$respjson->name = $user->name;
-					$respjson->role = $user->role;
-				}
-			} else {
-				$respjson = array(
-					'error' => "incorrect_login",
-					'message' => "Username or Password is incorrect"
-				);
-			}
-			$response = $response->withHeader( 'Content-type', 'application/json' );
-			$response = $response->withJson( $respjson );
-			return $response;
+			return $server->respondToAccessTokenRequest($request, $response);
+
 		} catch (OAuthServerException $exception) {
 			// All instances of OAuthServerException can be converted to a PSR-7 response
 			return $exception->generateHttpResponse($response);
+
 		} catch (\Exception $exception) {
 			// Catch unexpected exceptions
 			$body = $response->getBody();
@@ -178,7 +155,6 @@ $app->post( '/validate/login',
 		}
 	}
 );
-
 
 // USER INFO
 $app->get( '/user/details',
