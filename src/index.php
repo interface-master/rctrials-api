@@ -10,6 +10,7 @@ use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\ResourceServer;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Grant\PasswordGrant;
+use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use League\OAuth2\Server\Middleware\AuthorizationServerMiddleware;
 use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
 
@@ -38,6 +39,7 @@ $app = new \Slim\App([
 			PATH_RSA_KEYS.'private.key',  // path to private key
 			PATH_RSA_KEYS.'public.key'    // path to public key
 		);
+
 		// password grant
 		$grant_pass = new PasswordGrant(
 			new UserRepository(),           // instance of UserRepositoryInterface
@@ -49,6 +51,18 @@ $app = new \Slim\App([
 			$grant_pass,
 			new \DateInterval('PT1H') // access tokens will expire after 1 hour
 		);
+
+		// refresh grant
+		$grant_refresh = new RefreshTokenGrant(
+			new RefreshTokenRepository()
+		);
+		$grant_refresh->setRefreshTokenTTL(new \DateInterval('P1M'));
+		$server->enableGrantType(
+			$grant_refresh,
+			new \DateInterval('PT1H')
+		);
+		$server->grant_refresh = $grant_refresh;
+
 		return $server;
 	},
 	ResourceServer::class => function () {
