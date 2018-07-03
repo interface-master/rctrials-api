@@ -81,12 +81,20 @@ class DatabaseManager {
 	}
 
 	/**
-	 * Check `users` table by email and hash
+	 * Check login by extracting necessary info from request
 	 */
-	public function getUserByLogin( $request ) {
+	public function getUserByRequest( $request ) {
 		$email = $request->getParam('username');
 		$hash = $request->getParam('password');
 		$refresh = $request->getParam('request_token');
+		$rows = $this->getUserByLogin( $email, $hash );
+		return $rows;
+	}
+
+	/**
+	 * Check `users` table by email and hash
+	 */
+	public function getUserByLogin( $email, $hash ) {
 		$stmt = $this->dbh->prepare(
 			"SELECT * FROM `users`
 			WHERE `email`=:email AND `hash`=:hash");
