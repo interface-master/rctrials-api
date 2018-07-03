@@ -26,7 +26,7 @@ DEFINE( 'PATH_RSA_KEYS', 'file://'.__DIR__.'/../keys/' );
 
 $app = new \Slim\App([
 	'settings' => [
-		'displayErrorDetails' => true,
+		'displayErrorDetails' => true, // TODO: remove this for production
 	],
 	// Add the authorization server to the DI container
 	AuthorizationServer::class => function () {
