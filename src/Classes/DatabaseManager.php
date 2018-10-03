@@ -43,6 +43,9 @@ class DatabaseManager {
 		}
 		// attempt add
 		try {
+			// set @id=UUID();
+			// insert into <table>(<col1>,<col2>) values (@id,'another value');
+			// select @id;
 			$insert = $this->insertRecords(
 				'users',
 				"(`id`,`salt`,`hash`,`email`,`pass`,`name`,`role`)",
@@ -154,7 +157,11 @@ class DatabaseManager {
 	/**
 	 * Insert records
 	 */
-	public function insertRecords( $table, $inputs, $values, $obj, $update = '' ) {
+	private function insertRecords( $table, $inputs, $values, $obj, $update = '' ) {
+		// set @id=UUID();
+		// insert into <table>(<col1>,<col2>) values (@id,'another value');
+		// select @id;
+
 		try {
 			$stmt = $this->dbh->prepare("INSERT INTO $table $inputs VALUES $values $update");
 			$stmt->execute( $obj );
