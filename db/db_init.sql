@@ -1,5 +1,7 @@
 DROP TABLE IF EXISTS `users`;
 
+-- DEFINE USERS TABLE
+-- TO STORE ADMIN ACCOUNTS
 CREATE TABLE `users` (
 	`id` VARCHAR(36) NOT NULL,
 	`salt` VARCHAR(32) NOT NULL,
@@ -11,14 +13,77 @@ CREATE TABLE `users` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- INSERT INTO `users` (`id`,`salt`,`hash`,`email`,`pass`,`name`,`role`) VALUES
--- 	( UUID(), '..salt..', '..hash..', 'interface.master@gmail.com', 'abc', 'Interface Master', 'root' ),
--- 	( UUID(), '..salt..', '..hash..', 'john@smith.ca', 'Passw0rd', 'John Smith', 'admin' );
-
+-- DEFINE TOKENS TABLE
+-- STORES OAUTH TOKENS TO VALIDATE LOGINS
+-- ASSOCIATES TOKEN WITH USER ID
 CREATE TABLE `tokens` (
 	`uid` VARCHAR(36) NOT NULL,
 	`tid` TEXT,
 	`token` TEXT,
 	`expires` DATETIME NOT NULL,
 	PRIMARY KEY (`uid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- DEFINE TRIALS TABLE
+-- STORES DETAILS ABOUT TRIAL DATES, USER, TIMEZONE
+CREATE TABLE `trials` (
+	`tid` VARCHAR(4) NOT NULL,
+	`uid` VARCHAR(36) NOT NULL,
+	`title` VARCHAR(32) NOT NULL,
+	`regopen` DATETIME NOT NULL,
+	`regclose` DATETIME NOT NULL,
+	`trialstart` DATETIME NOT NULL,
+	`trialend` DATETIME NOT NULL,
+	`trialtype` ENUM('simple') NOT NULL,
+	`timezone` VARCHAR(32),
+	PRIMARY KEY (`tid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- CREATE A TRIGGER TO GENERATE UNIQUE 4-CHAR IDS FOR TRIALS
+DELIMITER //
+CREATE TRIGGER `trials_before_insert` BEFORE INSERT ON `trials`
+FOR EACH ROW BEGIN
+  DECLARE ready INT DEFAULT 0;
+  DECLARE rnd_str TEXT;
+  WHILE NOT READY DO
+    SET rnd_str := LEFT( UUID(), 4 );
+    IF NOT EXISTS (SELECT * FROM `trials` WHERE `tid` = rnd_str) THEN
+      SET new.tid = rnd_str;
+      SET ready := 1;
+    END IF;
+  END WHILE;
+END;//
+DELIMITER ;
+
+-- DEFINE GROUPS TABLE
+-- STORES TRIAL GROUP SIZE AND NAME
+CREATE TABLE `groups` (
+	`tid` VARCHAR(4) NOT NULL,
+	`gid` SMALLINT NOT NULL,
+	`name` VARCHAR(20) NOT NULL,
+	`size` ENUM('auto','manual') NOT NULL DEFAULT 'auto',
+	`size_n` SMALLINT,
+	PRIMARY KEY (`tid`,`gid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- DEFINE SURVEYS TABLE
+-- STORES NAME AND GROUPS FOR SURVEYS
+CREATE TABLE `surveys` (
+	`tid` VARCHAR(4) NOT NULL,
+	`sid` SMALLINT NOT NULL,
+	`name` VARCHAR(20) NOT NULL,
+	`groups` VARCHAR(20) NOT NULL,
+	PRIMARY KEY (`tid`,`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- DEFINE QUESTIONS TABLE
+-- STORES TRIAL, SURVEY, TEXT, AND OPTIONS
+CREATE TABLE `questions` (
+	`tid` VARCHAR(4) NOT NULL,
+	`sid` SMALLINT NOT NULL,
+	`qid` SMALLINT NOT NULL,
+	`text` VARCHAR(100) NOT NULL,
+	`type` ENUM('text','mc') NOT NULL DEFAULT 'text',
+	`options` VARCHAR(200),
+	PRIMARY KEY (`tid`,`sid`,`qid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
