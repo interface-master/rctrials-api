@@ -34,7 +34,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface {
 		$obj->access_token = $tokenJWT->__toString(); // this is the token that's sent back to the user
 		$obj->date_expires = $accessTokenEntity->getExpiryDateTime()->format("Y-m-d H:i:s"); // this is when the token expires
 
-		$output = $db->saveToken( $obj ); // table,filter,object,upsert
+		$output = $db->saveToken( $obj );
 		return $output;
 	}
 	/**
