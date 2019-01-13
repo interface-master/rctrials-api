@@ -28,10 +28,10 @@ class DatabaseManager {
 	}
 
 	/**
-	 * Inserts a new player into the `users` table
+	 * Inserts a new admin into the `users` table
 	 * makes sure that the email doesn't already exist
 	 */
-	public function newPlayer( $obj ) {
+	public function newAdmin( $obj ) {
 		// return value
 		$ret = new \stdClass();
 		// check if email exists
@@ -46,19 +46,21 @@ class DatabaseManager {
 			// set @id=UUID();
 			// insert into <table>(<col1>,<col2>) values (@id,'another value');
 			// select @id;
-			$insert = $this->insertRecords(
-				'users',
-				"(`id`,`salt`,`hash`,`email`,`pass`,`name`,`role`)",
-				"( UUID(), :salt, :hash, :email, :pass, :name, :role )",
-				array(
-					'salt' => $obj->salt,
-					'hash' => $obj->hash,
-					'email' => $obj->email,
-					'pass' => $obj->pass,
-					'name' => $obj->name,
-					'role' => $obj->role
-				)
-			);
+			$stmt = $this->dbh->prepare(
+				"INSERT INTO
+				`users`
+				(`id`,`salt`,`hash`,`email`,`pass`,`name`,`role`)
+				VALUES
+				( UUID(), :salt, :hash, :email, :pass, :name, :role );");
+			$stmt->execute(array(
+				'salt' => $obj->salt,
+				'hash' => $obj->hash,
+				'email' => $obj->email,
+				'pass' => $obj->pass,
+				'name' => $obj->name,
+				'role' => $obj->role
+			));
+
 			// get id
 			// TODO: this is possibly unnecessary, isn't used by the FE yet
 			$user = $this->getUserByEmail( $obj->email );
@@ -74,17 +76,24 @@ class DatabaseManager {
 
 	/**
 	 * Check `users` table by email passed
+	 * internal function
 	 */
 	public function getUserByEmail( $email ) {
-		$stmt = $this->dbh->prepare("SELECT * FROM `users` WHERE `email`=:email");
-		$stmt->bindParam( ':email', $email );
-		$stmt->execute();
+		$stmt = $this->dbh->prepare(
+			"SELECT *
+			FROM `users`
+			WHERE `email`=:email;");
+		$stmt->execute(array(
+			'email' => $email
+		));
 		$rows = $stmt->fetch(\PDO::FETCH_OBJ);
 		return $rows;
 	}
 
 	/**
 	 * Check login by extracting necessary info from request
+	 * internal function
+	 * NOT USED !?
 	 */
 	public function getUserByRequest( $request ) {
 		$email = $request->getParam('username');
@@ -96,20 +105,23 @@ class DatabaseManager {
 
 	/**
 	 * Check `users` table by email and hash
+	 * internal function
 	 */
 	public function getUserByLogin( $email, $hash ) {
 		$stmt = $this->dbh->prepare(
 			"SELECT * FROM `users`
 			WHERE `email`=:email AND `hash`=:hash");
-		$stmt->bindParam( ':email', $email );
-		$stmt->bindParam( ':hash', $hash );
-		$stmt->execute();
+		$stmt->execute(array(
+			'email' => $email,
+			'hash' => $hash
+		));
 		$rows = $stmt->fetch(\PDO::FETCH_OBJ);
 		return $rows;
 	}
 
 	/**
 	 * Check `users` table by `tid` from Authorization
+	 * internal function
 	 */
 	public function getUserByAuth( $token ) {
 		$stmt = $this->dbh->prepare(
@@ -135,41 +147,32 @@ class DatabaseManager {
 	 *
 	 */
 	public function saveToken( $obj ) {
-		$insert = $this->insertRecords(
-			'tokens',
-			"(`uid`,`tid`,`token`,`expires`)",
-			"( :uid, :tid, :token, :expires )",
-			array(
+		try {
+			$stmt = $this->dbh->prepare(
+				"INSERT INTO
+				`tokens`
+				(`uid`,`tid`,`token`,`expires`)
+				VALUES
+				( :uid, :tid, :token, :expires )
+				ON DUPLICATE KEY UPDATE
+					`tid`=:tid,
+					`token`=:token,
+					`expires`=:expires
+				");
+			$stmt->execute(array(
 				'uid' => $obj->uid,
 				'tid' => $obj->tid,
 				'token' => $obj->access_token, // TODO: don't save this - use `tid` instead
 				'expires' => $obj->date_expires
-			),
-			"ON DUPLICATE KEY UPDATE
-				`tid`=:tid,
-				`token`=:token,
-				`expires`=:expires"
-		);
-		// return $obj->access_token;
-	}
-
-
-	/**
-	 * Insert records
-	 */
-	private function insertRecords( $table, $inputs, $values, $obj, $update = '' ) {
-		// set @id=UUID();
-		// insert into <table>(<col1>,<col2>) values (@id,'another value');
-		// select @id;
-
-		try {
-			$stmt = $this->dbh->prepare("INSERT INTO $table $inputs VALUES $values $update");
-			$stmt->execute( $obj );
+			));
 			return true;
 		} catch( PDOException $e ) {
 			return false;
 		}
 	}
+
+
+
 
 	// public function getCursor() {
 	// 	$stmt = $this->dbh->prepare(
@@ -181,5 +184,3 @@ class DatabaseManager {
 	// }
 
 }
-
-?>
