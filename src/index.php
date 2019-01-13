@@ -184,22 +184,15 @@ $app->post( '/new/trial',
 		$user = $this->db->getUserByAuth( $request->getAttribute('oauth_access_token_id') );
 		if( $user !== false ) {
 			$trial = json_decode( $request->getParam('trial') );
-			$output = array(
-				'uid' => $user->uid,
-				'title' => $trial->title,
-				// 'regopen' => $request->getParam('regopen'),
-				// 'regclose' => $request->getParam('regclose'),
-				// 'trialstart' => $request->getParam('trialstart'),
-				// 'trialend' => $request->getParam('trialend'),
-				// 'trialtype' => $request->getParam('trialtype'),
-				// 'groups' => json_decode( $request->getParam('groups') ),
-			);
+			$trial->uid = $user->uid;
+			$output = $this->db->newTrial( $trial );
 		}
-		var_dump($output);
 		$response = $response->withHeader( 'Content-type', 'application/json' );
 		$response = $response->withJson( $output );
+		return $response;
 	}
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
+
 
 // TESTING
 // TODO: remove this

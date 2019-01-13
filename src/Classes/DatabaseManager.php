@@ -51,7 +51,8 @@ class DatabaseManager {
 				`users`
 				(`id`,`salt`,`hash`,`email`,`pass`,`name`,`role`)
 				VALUES
-				( UUID(), :salt, :hash, :email, :pass, :name, :role );");
+				( UUID(), :salt, :hash, :email, :pass, :name, :role );"
+			);
 			$stmt->execute(array(
 				'salt' => $obj->salt,
 				'hash' => $obj->hash,
@@ -75,6 +76,125 @@ class DatabaseManager {
 	}
 
 	/**
+	 * Inserts a new trial into the `trials` table
+	 * inserts new groups into the `groups` table
+	 * inserts new surveys into the `surveys` table
+	 * inserts new questions into the `questions` table
+	 */
+	public function newTrial( $obj ) {
+		// return value
+		$ret = new \stdClass();
+		// attempt add
+		try {
+			$stmt = $this->dbh->prepare(
+				"INSERT INTO
+				`trials`
+				(
+					`uid`, `title`,
+					`regopen`, `regclose`,
+					`trialstart`, `trialend`,
+					`trialtype`,`timezone`
+				)
+				VALUES
+				(
+					:uid, :title,
+					:regopen, :regclose,
+					:trialstart, :trialend,
+					:trialtype, :timezone
+				);"
+			);
+			$stmt->execute(array(
+				'uid' => $obj->uid,
+				'title' => $obj->title,
+				'regopen' => $obj->regopen,
+				'regclose' => $obj->regclose,
+				'trialstart' => $obj->trialstart,
+				'trialend' => $obj->trialend,
+				'trialtype' => $obj->trialtype,
+				'timezone' => $obj->timezone
+			));
+			// get trial id by selecting last inserted row
+			$stmt = $this->dbh->prepare(
+				"SELECT `tid`
+				FROM `trials`
+				WHERE `uid`=:uid
+				ORDER BY `created` DESC
+				LIMIT 1;"
+			);
+			$stmt->execute(array(
+				'uid' => $obj->uid
+			));
+			$row = $stmt->fetch(\PDO::FETCH_OBJ);
+			$ret->tid = $row->tid;
+			// insert groups
+			$ret->groups = 0;
+			foreach( $obj->groups as $key => $group ) {
+				$stmt = $this->dbh->prepare(
+					"INSERT INTO
+					`groups`
+					( `tid`, `gid`, `name`, `size`, `size_n` )
+					VALUES
+					( :tid, :gid, :name, :size, :size_n )"
+				);
+				$stmt->execute(array(
+					'tid' => $ret->tid,
+					'gid' => $group->group_id,
+					'name' => $group->group_name,
+					'size' => $group->group_size,
+					'size_n' => $group->group_size_n
+				));
+				$ret->groups++;
+			}
+			// insert surveys
+			$ret->surveys = 0;
+			$ret->questions = 0;
+			foreach( $obj->surveys as $keyS => $survey ) {
+				$stmt = $this->dbh->prepare(
+					"INSERT INTO
+					`surveys`
+					( `tid`, `sid`, `name`, `groups` )
+					VALUES
+					( :tid, :sid, :name, :groups )"
+				);
+				$stmt->execute(array(
+					'tid' => $ret->tid,
+					'sid' => $survey->survey_id,
+					'name' => $survey->survey_name,
+					'groups' => json_encode($survey->survey_groups)
+				));
+				$ret->surveys++;
+				// insert questions
+				foreach( $survey->survey_questions as $keyQ => $question ) {
+					$stmt = $this->dbh->prepare(
+						"INSERT INTO
+						`questions`
+						( `tid`, `sid`, `qid`, `text`, `type`, `options` )
+						VALUES
+						( :tid, :sid, :qid, :text, :type, :options )"
+					);
+					$stmt->execute(array(
+						'tid' => $ret->tid,
+						'sid' => $survey->survey_id,
+						'qid' => $question->question_id,
+						'text' => $question->question_text,
+						'type' => $question->question_type,
+						'options' => $question->question_options
+					));
+					$ret->questions++;
+				}
+			}
+			// all done
+			$ret->status = 200;
+		} catch( PDOException $e ) {
+			$ret->status = $e->getCode();
+			$ret->message = $e->getMessage();
+		}
+		// return
+		return $ret;
+	}
+
+
+	/**
 	 * Check `users` table by email passed
 	 * internal function
 	 */
@@ -95,6 +215,7 @@ class DatabaseManager {
 	 * internal function
 	 * NOT USED !?
 	 */
+	/*
 	public function getUserByRequest( $request ) {
 		$email = $request->getParam('username');
 		$hash = $request->getParam('password');
@@ -102,6 +223,7 @@ class DatabaseManager {
 		$rows = $this->getUserByLogin( $email, $hash );
 		return $rows;
 	}
+	*/
 
 	/**
 	 * Check `users` table by email and hash
@@ -142,6 +264,7 @@ class DatabaseManager {
 		$rows = $stmt->fetch(\PDO::FETCH_OBJ);
 		return $rows;
 	}
+
 
 	/**
 	 *
