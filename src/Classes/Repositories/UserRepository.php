@@ -33,7 +33,6 @@ class UserRepository implements UserRepositoryInterface
 		$obj->email = $username;
 		$obj->hash = $password;
 		$record = $db->getUserByLogin( $obj->email, $obj->hash );
-		// $record = $db->getValue( 'players', ['email'=>$obj->email, 'hash'=>$obj->hash], [] );
 
 		if( $record !== false ) {
 			return new UserEntity( $record->id );
