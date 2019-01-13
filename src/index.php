@@ -176,6 +176,31 @@ $app->get( '/user/details',
 		return $response;
 	}
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
+// ADMIN LIST TRIALS
+$app->get( '/user/trials',
+	function( Request $request, Response $response ) use ( $app ) {
+		$output = new \stdClass();
+		$user = $this->db->getUserByAuth( $request->getAttribute('oauth_access_token_id') );
+		$output = $this->db->getUserTrials( $user->uid );
+		$response = $response->withHeader( 'Content-type', 'application/json' );
+		$response = $response->withJson( $output );
+		return $response;
+	}
+)->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
+// ADMIN TRIAL DETAILS
+$app->get( '/trial/{tid}',
+	function( Request $request, Response $response, array $args ) use ( $app ) {
+		$output = new \stdClass();
+		$user = $this->db->getUserByAuth( $request->getAttribute('oauth_access_token_id') );
+		$tid = $args['tid'];
+		$output = $this->db->getTrialDetails( $user->uid, $tid );
+		$response = $response->withHeader( 'Content-type', 'application/json' );
+		$response = $response->withJson( $output );
+		return $response;
+	}
+)->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
+
+
 
 // ADMIN NEW TRIAL
 $app->post( '/new/trial',

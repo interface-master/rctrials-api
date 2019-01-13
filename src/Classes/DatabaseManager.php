@@ -259,8 +259,9 @@ class DatabaseManager {
 				ON (t.uid = u.id)
 			WHERE
 				t.tid=:tid");
-		$stmt->bindParam( ':tid', $token );
-		$stmt->execute();
+		$stmt->execute(array(
+			'tid' => $token
+		));
 		$rows = $stmt->fetch(\PDO::FETCH_OBJ);
 		return $rows;
 	}
@@ -295,6 +296,95 @@ class DatabaseManager {
 	}
 
 
+	public function getUserTrials( $uid ) {
+		$stmt = $this->dbh->prepare(
+			"SELECT
+				*
+			FROM
+				`trials`
+			WHERE
+				`uid` = :uid
+			ORDER BY `created` DESC"
+		);
+		$stmt->execute(array(
+			'uid' => $uid
+		));
+		$rows = $stmt->fetchAll(\PDO::FETCH_OBJ);
+		return $rows;
+	}
+
+	public function getTrialDetails( $uid, $tid ) {
+		// trial
+		$trial = new \stdClass();
+		$stmt = $this->dbh->prepare(
+			"SELECT
+				*
+			FROM
+				`trials`
+			WHERE
+				`uid` = :uid
+				AND
+				`tid` = :tid
+			ORDER BY `created` DESC;"
+		);
+		$stmt->execute(array(
+			'uid' => $uid,
+			'tid' => $tid
+		));
+		$trial = $stmt->fetch(\PDO::FETCH_OBJ);
+		unset( $trial->uid );
+		// groups
+		$stmt = $this->dbh->prepare(
+			"SELECT
+				`gid`, `name`, `size`, `size_n`
+			FROM
+				`groups`
+			WHERE
+				`tid` = :tid
+			ORDER BY `gid`;"
+		);
+		$stmt->execute(array(
+			'tid' => $tid
+		));
+		$trial->groups = $stmt->fetchAll(\PDO::FETCH_OBJ);
+		// surveys
+		$stmt = $this->dbh->prepare(
+			"SELECT
+				`sid`, `name`, `groups`
+			FROM
+				`surveys`
+			WHERE
+				`tid` = :tid
+			ORDER BY `sid`;"
+		);
+		$stmt->execute(array(
+			'tid' => $tid
+		));
+		$surveys = $stmt->fetchAll(\PDO::FETCH_OBJ);
+		$trial->surveys = array();
+		foreach( $surveys as $key => $survey ) {
+			// questions
+			$stmt2 = $this->dbh->prepare(
+				"SELECT
+					`qid`, `text`, `type`, `options`
+				FROM
+					`questions`
+				WHERE
+					`tid` = :tid
+					AND
+					`sid` = :sid
+				ORDER BY `qid`;"
+			);
+			$stmt2->execute(array(
+				'tid' => $tid,
+				'sid' => $survey->sid
+			));
+			$questions = $stmt2->fetchAll(\PDO::FETCH_OBJ);
+			$survey->questions = $questions;
+			array_push( $trial->surveys, $survey );
+		}
+		return $trial;
+	}
 
 
 	// public function getCursor() {
