@@ -299,7 +299,11 @@ class DatabaseManager {
 	public function getUserTrials( $uid ) {
 		$stmt = $this->dbh->prepare(
 			"SELECT
-				*
+				`tid`, `title`,
+				`regopen`, `regclose`,
+				`trialstart`, `trialend`,
+				`trialtype`, `timezone`,
+				`created`, `updated`
 			FROM
 				`trials`
 			WHERE
