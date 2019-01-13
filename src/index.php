@@ -102,7 +102,7 @@ $app->add(function ($req, $res, $next) {
 		->withHeader('Access-Control-Max-Age', '600');
 });
 
-// REGISTRATION ENDPOINT
+// ADMIN REGISTRATION ENDPOINT
 $app->post( '/register',
 	function( Request $request, Response $response ) use ( $app ) {
 		$obj = new \stdClass();
@@ -113,7 +113,7 @@ $app->post( '/register',
 		$obj->salt = $request->getParam('salt');
 		$obj->hash = $request->getParam('hash');
 		// check if email exists
-		$output = $this->db->newPlayer( $obj );
+		$output = $this->db->newAdmin( $obj );
 		// output
 		$response = $response->withHeader( 'Content-type', 'application/json' );
 		$response = $response->withJson( $output );
@@ -121,6 +121,7 @@ $app->post( '/register',
 	}
 );
 
+// CONFIRMS ADMIN EMAIL IN THE SYSTEM
 $app->post( '/validate/email',
 	function( Request $request, Response $response ) use ( $app ) {
 		$output = new \stdClass();
@@ -136,7 +137,7 @@ $app->post( '/validate/email',
 		return $response;
 	}
 );
-
+// CONFIRMS ADMIN CREDENTIALS
 $app->post( '/validate/login',
 	function( Request $request, Response $response ) use ( $app ) {
 		$server = $app->getContainer()->get(AuthorizationServer::class);
@@ -176,6 +177,29 @@ $app->get( '/user/details',
 	}
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
 
+// ADMIN NEW TRIAL
+$app->post( '/new/trial',
+	function( Request $request, Response $response ) use ( $app ) {
+		$output = new \stdClass();
+		$user = $this->db->getUserByAuth( $request->getAttribute('oauth_access_token_id') );
+		if( $user !== false ) {
+			$trial = json_decode( $request->getParam('trial') );
+			$output = array(
+				'uid' => $user->uid,
+				'title' => $trial->title,
+				// 'regopen' => $request->getParam('regopen'),
+				// 'regclose' => $request->getParam('regclose'),
+				// 'trialstart' => $request->getParam('trialstart'),
+				// 'trialend' => $request->getParam('trialend'),
+				// 'trialtype' => $request->getParam('trialtype'),
+				// 'groups' => json_decode( $request->getParam('groups') ),
+			);
+		}
+		var_dump($output);
+		$response = $response->withHeader( 'Content-type', 'application/json' );
+		$response = $response->withJson( $output );
+	}
+)->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
 
 // TESTING
 // TODO: remove this
