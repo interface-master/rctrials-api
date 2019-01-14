@@ -126,6 +126,11 @@ CREATE TABLE `surveys` (
 	`sid` SMALLINT NOT NULL,
 	`name` VARCHAR(20) NOT NULL,
 	`groups` VARCHAR(20) NOT NULL,
+	`pre` BOOLEAN DEFAULT FALSE,
+	`during` BOOLEAN DEFAULT FALSE,
+	`post` BOOLEAN DEFAULT FALSE,
+	`interval` SMALLINT DEFAULT 1,
+	`frequency` ENUM('days','weeks','months') DEFAULT 'days',
 	PRIMARY KEY (`tid`,`sid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
