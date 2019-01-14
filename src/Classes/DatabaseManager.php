@@ -200,15 +200,20 @@ class DatabaseManager {
 				$stmt = $this->dbh->prepare(
 					"INSERT INTO
 					`surveys`
-					( `tid`, `sid`, `name`, `groups` )
+					( `tid`, `sid`, `name`, `groups`, `pre`, `during`, `post`, `interval`, `frequency` )
 					VALUES
-					( :tid, :sid, :name, :groups )"
+					( :tid, :sid, :name, :groups, :pre, :during, :post, :interval, :frequency )"
 				);
 				$stmt->execute(array(
 					'tid' => $ret->tid,
 					'sid' => $survey->survey_id,
 					'name' => $survey->survey_name,
-					'groups' => json_encode($survey->survey_groups)
+					'groups' => json_encode($survey->survey_groups),
+					'pre' => $survey->survey_pre,
+					'during' => $survey->survey_during,
+					'post' => $survey->survey_post,
+					'interval' => $survey->survey_interval,
+					'frequency' => $survey->survey_frequency
 				));
 				$ret->surveys++;
 				// insert questions
