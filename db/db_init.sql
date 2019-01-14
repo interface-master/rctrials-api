@@ -24,17 +24,21 @@ CREATE TABLE `subjects` (
 
 -- CREATE A STORED PROCEDURE THAT WILL BUCKET SUBJECTS INTO GROUPS
 DELIMITER //
-DROP PROCEDURE IF EXISTS bucket_subjects_into_groups //
 CREATE PROCEDURE bucket_subjects_into_groups(IN in_tid VARCHAR(4))
 	BEGIN
 	DECLARE done INT DEFAULT 0;
 	DECLARE current_subject VARCHAR(36);
+	-- counter to loop over available groups
 	DECLARE counter INT DEFAULT 0;
-	DECLARE group_count (SELECT COUNT(*) AS `count` FROM `groups` WHERE `tid` = in_tid);
+	DECLARE group_count INT DEFAULT 0;
+	DECLARE current_group INT DEFAULT NULL;
 	-- declare cursor for subjects in this trial
-	DEClARE subject_cursor CURSOR FOR SELECT `id` FROM `subjects` WHERE `tid` = in_tid;
+	DEClARE subject_cursor CURSOR FOR SELECT `id` FROM `subjects` WHERE `tid` = in_tid ORDER BY RAND();
 	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
+	SET group_count = (SELECT COUNT(*) AS `count` FROM `groups` WHERE `tid` = in_tid);
+
+	-- open the cursor to iterate over all subjects
 	OPEN subject_cursor;
 	assign_group: LOOP
 
@@ -45,10 +49,14 @@ CREATE PROCEDURE bucket_subjects_into_groups(IN in_tid VARCHAR(4))
 	END IF;
 
 	-- assign group
-	UPDATE `subjects` SET `group` = (group_count) WHERE `id` = current_subject;
+	SET current_group = (SELECT `gid` FROM `groups` WHERE `tid` = in_tid ORDER BY `gid` LIMIT 1 OFFSET counter);
+	UPDATE `subjects` SET `group` = current_group WHERE `id` = current_subject;
 
 	-- incremet loop counter
 	SET counter = counter + 1;
+	IF counter >= group_count THEN
+	SET counter = 0;
+	END IF;
 
 	END LOOP assign_group;
 	CLOSE subject_cursor;
