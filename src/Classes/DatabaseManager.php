@@ -108,8 +108,42 @@ class DatabaseManager {
 				);
 				$stmt->execute();
 				$subject = $stmt->fetch(\PDO::FETCH_OBJ);
-				// var_dump( $subject );
+				// get pre-test surveys
+				$stmt = $this->dbh->prepare(
+					"SELECT
+						`tid`, `sid`, `name`
+					FROM
+						`surveys`
+					WHERE
+						`tid` = :tid
+					AND `pre` = 1;"
+				);
+				$stmt->execute(array(
+					'tid' => $tid
+				));
+				$surveys = $stmt->fetchAll(\PDO::FETCH_OBJ);
+				foreach( $surveys as $key => $survey ) {
+					$stmt2 = $this->dbh->prepare(
+						"SELECT
+							`qid`, `text`, `type`, `options`
+						FROM
+							`questions`
+						WHERE
+							`tid` = :tid
+						AND `sid` = :sid
+						ORDER BY
+							`qid`;"
+					);
+					$stmt2->execute(array(
+						'tid' => $tid,
+						'sid' => $survey->sid
+					));
+					$questions = $stmt2->fetchAll(\PDO::FETCH_OBJ);
+					$survey->questions = $questions;
+				}
+				// output
 				$ret->uuid = $subject->uid;
+				$ret->surveys = $surveys;
 				$ret->status = 200;
 			} else {
 				$ret->status = 204;
