@@ -102,7 +102,7 @@ $app->add(function ($req, $res, $next) {
 		->withHeader('Access-Control-Max-Age', '600');
 });
 
-// ADMIN REGISTRATION ENDPOINT
+// ADMIN REGISTRATION
 $app->post( '/register',
 	function( Request $request, Response $response ) use ( $app ) {
 		$obj = new \stdClass();
@@ -200,8 +200,6 @@ $app->get( '/trial/{tid}',
 	}
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
 
-
-
 // ADMIN NEW TRIAL
 $app->post( '/new/trial',
 	function( Request $request, Response $response ) use ( $app ) {
@@ -217,6 +215,20 @@ $app->post( '/new/trial',
 		return $response;
 	}
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
+
+
+// SUBJECT REGISTRATION
+$app->post( '/register/{tid}',
+	function( Request $request, Response $response, array $args ) use ( $app ) {
+		$output = new \stdClass();
+		$tid = $args['tid'];
+		// output
+		$output = $this->db->newSubject( $tid );
+		$response = $response->withHeader( 'Content-type', 'application/json' );
+		$response = $response->withJson( $output );
+		return $response;
+	}
+);
 
 
 // TESTING

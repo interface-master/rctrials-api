@@ -75,6 +75,54 @@ class DatabaseManager {
 		return $ret;
 	}
 
+	public function newSubject( $tid ) {
+		// return value
+		$ret = new \stdClass();
+		try {
+			// look up trial
+			$stmt = $this->dbh->prepare(
+				"SELECT COUNT(*) AS `count`
+				FROM `trials`
+				WHERE `regopen` <= NOW()
+				AND `regclose` > NOW()
+				AND `tid` = :tid;"
+			);
+			$stmt->execute(array(
+				'tid' => $tid
+			));
+			$found = $stmt->fetch(\PDO::FETCH_OBJ)->count > 0;
+			// create new registration
+			if( $found ) {
+				$this->dbh->exec("SET @UID = UUID();");
+				$stmt = $this->dbh->prepare(
+					"INSERT INTO
+					`subjects` ( id, tid )
+					VALUES
+					( @UID, :tid );"
+				);
+				$stmt->execute(array(
+					'tid' => $tid
+				));
+				$stmt = $this->dbh->prepare(
+					"SELECT @UID AS `uid`;"
+				);
+				$stmt->execute();
+				$subject = $stmt->fetch(\PDO::FETCH_OBJ);
+				// var_dump( $subject );
+				$ret->uuid = $subject->uid;
+				$ret->status = 200;
+			} else {
+				$ret->status = 204;
+				$ret->message = "The registration window for this trial is closed.";
+			}
+		} catch( PDOException $e ) {
+			$ret->status = $e->getCode();
+			$ret->message = $e->getMessage();
+		}
+		// return
+		return $ret;
+	}
+
 	/**
 	 * Inserts a new trial into the `trials` table
 	 * inserts new groups into the `groups` table
