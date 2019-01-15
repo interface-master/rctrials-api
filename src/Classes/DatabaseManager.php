@@ -383,6 +383,9 @@ class DatabaseManager {
 	}
 
 
+	/**
+	 * returns a list of trials for admin user
+	 */
 	public function getUserTrials( $uid ) {
 		$stmt = $this->dbh->prepare(
 			"SELECT
@@ -404,6 +407,10 @@ class DatabaseManager {
 		return $rows;
 	}
 
+	/**
+	 * returns details for a trial
+	 * as long as it matches the user's uid
+	 */
 	public function getTrialDetails( $uid, $tid ) {
 		// trial
 		$trial = new \stdClass();
@@ -477,6 +484,66 @@ class DatabaseManager {
 		return $trial;
 	}
 
+	/**
+	 *
+	 */
+	public function getSubjectSurveys( $uid, $tid ) {
+		// get surveys
+		$stmt = $this->dbh->prepare(
+			"SELECT
+				`s`.`tid`, `s`.`sid`, `s`.`name`,
+				`s`.`pre`, `s`.`post`, `s`.`during`, `s`.`interval`, `s`.`frequency`
+			FROM
+				`subjects` AS `u`
+			INNER JOIN
+				`trials` AS `t`
+				ON (`u`.`tid` = `t`.`tid`)
+			INNER JOIN
+				`groups` AS `g`
+				ON (`u`.`group` = `g`.`gid` AND `u`.`tid` = `g`.`tid`)
+			INNER JOIN
+				`surveys` AS `s`
+				ON (
+					`u`.`tid` = `s`.`tid`
+					AND
+					FIND_IN_SET(`g`.`gid`, SUBSTRING( `s`.`groups`, 2, length(`s`.`groups`)-2 )) <> 0
+					AND
+					IF( NOW() < `t`.`trialstart`, `s`.`pre` = 1, `s`.`pre` = 0 )
+					AND
+					IF( NOW() > `t`.`trialend`, `s`.`post` = 1, `s`.`post` = 0 )
+					AND
+					IF( NOW() > `t`.`trialstart` AND NOW() < `t`.`trialend`, `s`.`during` = 1, `s`.`during` = 0 )
+				)
+			WHERE
+				`u`.`id` = :uid
+			AND `u`.`tid` = :tid;"
+		);
+		$stmt->execute(array(
+			'uid' => $uid,
+			'tid' => $tid
+		));
+		$surveys = $stmt->fetchAll(\PDO::FETCH_OBJ);
+		// get questions
+		foreach( $surveys as $key => $survey ) {
+			$stmt = $this->dbh->prepare(
+				"SELECT
+					`qid`, `text`, `type`, `options`
+				FROM
+					`questions`
+				WHERE
+					`tid` = :tid
+				AND `sid` = :sid;"
+			);
+			$stmt->execute(array(
+				'tid' => $tid,
+				'sid' => $survey->sid
+			));
+			$questions = $stmt->fetchAll(\PDO::FETCH_OBJ);
+			$survey->questions = $questions;
+		}
+		// return
+		return $surveys;
+	}
 
 	// public function getCursor() {
 	// 	$stmt = $this->dbh->prepare(

@@ -230,6 +230,19 @@ $app->post( '/register/{tid}',
 	}
 );
 
+// TRIAL SURVEY LIST
+$app->get( '/trial/{tid}/surveys',
+	function( Request $request, Response $response, array $args ) use ( $app ) {
+		$output = new \stdClass();
+		$tid = $args['tid'];
+		$uid = $request->getParam('uuid');;
+		// output
+		$output = $this->db->getSubjectSurveys( $uid, $tid );
+		$response = $response->withHeader( 'Content-type', 'application/json' );
+		$response = $response->withJson( $output );
+		return $response;
+	}
+);
 
 // TESTING
 // TODO: remove this
