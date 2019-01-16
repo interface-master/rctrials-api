@@ -244,6 +244,23 @@ $app->get( '/trial/{tid}/surveys',
 	}
 );
 
+// SUBJECT SURVEY POST
+$app->post( '/trial/{tid}/survey/{sid}',
+	function( Request $request, Response $response, array $args ) use ( $app ) {
+		$output = new \stdClass();
+		$tid = $args['tid'];
+		$sid = $args['sid'];
+		$uid = $request->getParam('uuid');
+		$answers = json_decode( $request->getParam('answers') );
+		// output
+		$output->success = $this->db->saveSurveyAnswers( $uid, $tid, $sid, $answers );
+		$output->answers = $answers;
+		$response = $response->withHeader( 'Content-type', 'application/json' );
+		$response = $response->withJson( $output );
+		return $response;
+	}
+);
+
 // TESTING
 // TODO: remove this
 $app->get('/hello/{name}', function (Request $request, Response $response, array $args) {

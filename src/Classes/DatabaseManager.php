@@ -485,7 +485,9 @@ class DatabaseManager {
 	}
 
 	/**
-	 *
+	 * Returns all the available surveys
+	 * for a given trial for the requesting user
+	 * depending on their group assignment
 	 */
 	public function getSubjectSurveys( $uid, $tid ) {
 		// get surveys
@@ -543,6 +545,33 @@ class DatabaseManager {
 		}
 		// return
 		return $surveys;
+	}
+
+	/**
+	 *
+	 */
+	public function saveSurveyAnswers( $uid, $tid, $sid, $answers ) {
+		try {
+			foreach( $answers as $key => $answer ) {
+				$stmt = $this->dbh->prepare(
+					"INSERT INTO
+					`answers`
+					(`tid`,`sid`,`qid`,`uid`,`text`)
+					VALUES
+					( :tid, :sid, :qid, :uid, :answer );"
+				);
+				$res = $stmt->execute(array(
+					'tid' => $tid,
+					'sid' => $sid,
+					'qid' => $answer->qid,
+					'uid' => $uid,
+					'answer' => $answer->answer
+				));
+			}
+			return true;
+		} catch( PDOException $e ) {
+			return false;
+		}
 	}
 
 	// public function getCursor() {
