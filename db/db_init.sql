@@ -154,7 +154,8 @@ CREATE TABLE `answers` (
 	`qid` SMALLINT NOT NULL,
 	`uid` VARCHAR(36) NOT NULL,
 	`text` VARCHAR(100) NOT NULL,
-	PRIMARY KEY (`tid`,`sid`,`qid`,`uid`),
+	`timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`tid`,`sid`,`qid`,`uid`,`timestamp`),
 	FOREIGN KEY (`tid`,`sid`,`qid`)
 	REFERENCES questions(`tid`,`sid`,`qid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
