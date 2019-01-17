@@ -492,33 +492,71 @@ class DatabaseManager {
 	public function getSubjectSurveys( $uid, $tid ) {
 		// get surveys
 		$stmt = $this->dbh->prepare(
-			"SELECT
-				`s`.`tid`, `s`.`sid`, `s`.`name`,
-				`s`.`pre`, `s`.`post`, `s`.`during`, `s`.`interval`, `s`.`frequency`
-			FROM
-				`subjects` AS `u`
-			INNER JOIN
-				`trials` AS `t`
-				ON (`u`.`tid` = `t`.`tid`)
-			INNER JOIN
-				`groups` AS `g`
-				ON (`u`.`group` = `g`.`gid` AND `u`.`tid` = `g`.`tid`)
-			INNER JOIN
-				`surveys` AS `s`
-				ON (
-					`u`.`tid` = `s`.`tid`
-					AND
-					FIND_IN_SET(`g`.`gid`, SUBSTRING( `s`.`groups`, 2, length(`s`.`groups`)-2 )) <> 0
-					AND
-					IF( NOW() < `t`.`trialstart`, `s`.`pre` = 1, `s`.`pre` = 0 )
-					AND
-					IF( NOW() > `t`.`trialend`, `s`.`post` = 1, `s`.`post` = 0 )
-					AND
-					IF( NOW() > `t`.`trialstart` AND NOW() < `t`.`trialend`, `s`.`during` = 1, `s`.`during` = 0 )
-				)
+			"SELECT * FROM (
+				SELECT
+					`s`.`tid`, `s`.`sid`, `s`.`name`,
+					`s`.`pre`, `s`.`post`, `s`.`during`, `s`.`interval`, `s`.`frequency`,
+					COUNT(`a`.`uid`) AS `answers`
+				FROM
+					`subjects` AS `u`
+				INNER JOIN
+					`trials` AS `t`
+					ON (`u`.`tid` = `t`.`tid`)
+				INNER JOIN
+					`groups` AS `g`
+					ON (`u`.`group` = `g`.`gid` AND `u`.`tid` = `g`.`tid`)
+				INNER JOIN
+					`surveys` AS `s`
+					ON (
+						`u`.`tid` = `s`.`tid`
+						AND
+						FIND_IN_SET(`g`.`gid`, SUBSTRING( `s`.`groups`, 2, length(`s`.`groups`)-2 )) <> 0
+						AND
+						IF(
+							NOW() < `t`.`trialstart`,
+							`s`.`pre` = 1,
+							`s`.`pre` = 0
+						)
+						AND
+						IF(
+							NOW() > `t`.`trialend`,
+							`s`.`post` = 1,
+							`s`.`post` = 0
+						)
+						AND
+						IF(
+							NOW() > `t`.`trialstart` AND NOW() < `t`.`trialend`,
+							`s`.`during` = 1,
+							`s`.`during` = 0
+						)
+					)
+				LEFT JOIN
+					`answers` AS `a`
+					ON (
+						`u`.`tid` = `a`.`tid`
+						AND
+						`u`.`id` = `a`.`uid`
+						AND
+						`s`.`sid` = `a`.`sid`
+						AND
+							IF( `s`.`during` = 1,
+								`a`.`timestamp`
+								BETWEEN
+								DATE_SUB( NOW(), INTERVAL `s`.`interval` DAY )
+								AND
+								NOW()
+								,
+								true
+							)
+					)
+				WHERE
+					`u`.`id` = :uid
+				AND `u`.`tid` = :tid
+				GROUP BY
+					`a`.`tid`, `a`.`sid`, `a`.`uid`
+			) AS `x`
 			WHERE
-				`u`.`id` = :uid
-			AND `u`.`tid` = :tid;"
+				`x`.`answers` < 1;"
 		);
 		$stmt->execute(array(
 			'uid' => $uid,
