@@ -1,10 +1,26 @@
 <?php
 
-// the following mocks a trial over 10 days
+// the following mocks a trial over 60 days
+//
 // expected output:
 // 1 pre-test per subject
-// 10 during-tests per subject
+// 56 during-tests per subject for bucket 0
+// 16 during-tests per subject for bucket 1
 // 1 post-test per subject
+//
+// process:
+// run a mock trial:
+// - create new trial {tid}
+// - generate 20 new subjects {subj[]}
+// daily procedure:
+// - loop over subjects and hit the /trial/{tid}/surveys + subj[uuid]
+// - loop over returned surveys->questions and generate random answers
+// -- type text receives 'X', type mc parses options and picks one at random;
+// - post answers
+// - advance day+1
+// :end daily procedure
+// (run this for count of 60)
+
 
 DEFINE("urlRoot", "http://localhost/");
 // DEFINE("tid", '6f7a');
