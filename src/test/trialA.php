@@ -9,7 +9,7 @@
 DEFINE("urlRoot", "http://localhost/");
 // DEFINE("tid", '6f7a');
 DEFINE("tid", 'c414');
-DEFINE("sampleSize", 2);
+DEFINE("sampleSize", 20);
 
 // connect to database for some direct manipulation
 $host = 'mysql';
