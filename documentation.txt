@@ -1,0 +1,47 @@
+# ADMIN
+
+POST /register
+	-> email, passhash, salt, name, role
+	<- uuid
+
+POST /validate/email
+	-> username
+	<- salt
+
+POST /validate/login
+	-> user, passhash
+	<- access_token, refresh_token
+
+	-> refresh_grant, refresh_token
+	<- access_token, refresh_token
+
+GET /user/details
+	-> access_token
+	<- uid, email, name, role
+
+GET /user/trials
+	-> access_token
+	<- trials[]
+
+GET /trial/{tid}
+	-> access_token, tid
+	<- trial(...,groups,surveys[(questions)])
+
+POST /new/trial
+	-> access_token, trial object ( title, regopen, regclose, trialstart, trialend, type, groups[(gid,name,size,size_n)], surveys[(sid,name,groups,questions[(qid,text,type,options)])], timezone )
+	<- tid
+
+
+# SUBJECT
+
+POST /register/{tid}
+	-> tid
+	<- uuid, surveys[(tid,sid,name,questions[(qid,text,type,options)])]
+
+GET /trial/{tid}/surveys
+	-> tid, uuid
+	<- survey object ()
+
+POST /trial/{tid}/survey/{sid}/
+	-> tid, sid, [qid,answer]
+	<- success
