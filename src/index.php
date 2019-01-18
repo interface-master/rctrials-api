@@ -103,6 +103,17 @@ $app->add(function ($req, $res, $next) {
 });
 
 // ADMIN REGISTRATION
+/**
+ * @api {post} /register Register new Admin user
+ * @apiName PostRegister
+ * @apiGroup Admin
+ *
+ * @apiParam {String} email Admin's email address.
+ * @apiParam {String} email Admin's email address.
+ *
+ * @apiSuccess {String} uuid A Unique ID for the Admin.
+ *
+ */
 $app->post( '/register',
 	function( Request $request, Response $response ) use ( $app ) {
 		$obj = new \stdClass();
