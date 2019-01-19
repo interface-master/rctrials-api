@@ -561,6 +561,10 @@ $app->post( '/register/{tid}',
 		$tid = $args['tid'];
 		// output
 		$output = $this->db->newSubject( $tid );
+		if( $output->status !== 200 ) {
+			$response = $response->withStatus( $output->status );
+		}
+		unset( $output->status );
 		$response = $response->withHeader( 'Content-type', 'application/json' );
 		$response = $response->withJson( $output );
 		return $response;
