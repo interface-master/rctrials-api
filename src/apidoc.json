@@ -3,5 +3,17 @@
   "version": "0.0.1",
   "description": "API for the Research Server",
   "title": "MRCT Research Server API",
-  "url" : "https://api.github.com/v1"
+  "url": "http://localhost",
+  "order": [
+    "PostRegister",
+    "PostValidateEmail",
+    "PostValidateLogin",
+    "GetUserDetails",
+    "GetUserTrials",
+    "GetTrial",
+    "PostNewTrial",
+    "PostRegisterForTrial",
+    "GetTrialSurveys",
+    "PostSurveyAnswers"
+  ]
 }

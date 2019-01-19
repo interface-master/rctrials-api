@@ -37,8 +37,8 @@ class DatabaseManager {
 		// check if email exists
 		$cursor = $this->getUserByEmail( $obj->email );
 		if( $cursor !== false ) {
-			$ret->status = 500;
-			$ret->message = 'Email '.$obj->email.' already exists';
+			$ret->status = 409;
+			$ret->error = 'Email '.$obj->email.' already exists.';
 			return $ret;
 		}
 		// attempt add
@@ -69,7 +69,7 @@ class DatabaseManager {
 			$ret->status = 200;
 		} catch( PDOException $e ) {
 			$ret->status = $e->getCode();
-			$ret->message = $e->getMessage();
+			$ret->error = $e->getMessage();
 		}
 		// return
 		return $ret;

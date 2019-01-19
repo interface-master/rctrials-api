@@ -24,7 +24,6 @@ use MRCT\DatabaseManager;
 
 DEFINE( 'PATH_RSA_KEYS', 'file://'.__DIR__.'/../keys/' );
 
-
 $app = new \Slim\App([
 	'settings' => [
 		'displayErrorDetails' => true, // TODO: remove this for production
@@ -104,15 +103,37 @@ $app->add(function ($req, $res, $next) {
 
 // ADMIN REGISTRATION
 /**
- * @api {post} /register Register new Admin user
+ * @api {post} /register New User
  * @apiName PostRegister
+ * @apiVersion 0.0.1
  * @apiGroup Admin
  *
  * @apiParam {String} email Admin's email address.
- * @apiParam {String} email Admin's email address.
+ * @apiParam {String} hash Admin's hashed password address.
+ * @apiParam {String} name Admin's name.
+ * @apiParam {String=admin} role Admin's role.
+ * @apiParam {String} pass `!! REMOVE THIS !!` actual password for testing.
+ * @apiParam {String} salt `!! REMOVE THIS !!` salt used for hashing the password.
  *
- * @apiSuccess {String} uuid A Unique ID for the Admin.
+ * @apiSuccess {String} id A Unique ID for the Admin.
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+ *     }
  *
+ * @apiError EmailExists The <code>email</code> provided already exists in the system.
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 409 Conflict
+ *     {
+ *       "message": "Email xxx@xxx.xx already exists."
+ *     }
+ *
+ * @apiDescription
+ *
+ * TODO:
+ * - remove pass and salt from being sent and stored
+ * - return error when one of the required fields isn't sent
  */
 $app->post( '/register',
 	function( Request $request, Response $response ) use ( $app ) {
@@ -126,7 +147,11 @@ $app->post( '/register',
 		// check if email exists
 		$output = $this->db->newAdmin( $obj );
 		// output
+		if( strlen($output->error) > 0 ) {
+			$response = $response->withStatus( $output->status );
+		}
 		$response = $response->withHeader( 'Content-type', 'application/json' );
+		unset( $output->status );
 		$response = $response->withJson( $output );
 		return $response;
 	}
@@ -134,10 +159,20 @@ $app->post( '/register',
 
 // CONFIRMS ADMIN EMAIL IN THE SYSTEM
 /**
- * @api {post} /validate/email Validates if an email address exists in the system
+ * @api {post} /validate/email Validate Email
  * @apiName PostValidateEmail
+ * @apiVersion 0.0.1
  * @apiGroup Admin
  *
+ * @apiParam {String} username Admin's email address.
+ *
+ * @apiSuccess {String} salt The salt that was added to the password for hashing.
+ *
+ * @apiDescription Validates if an email address exists in the system.
+ *
+ * TODO:
+ * - potentially get rid of sending the salt back; should be stored by FE.
+ * - currently, returns blank object if email doesn't exist
  */
 $app->post( '/validate/email',
 	function( Request $request, Response $response ) use ( $app ) {
@@ -156,9 +191,77 @@ $app->post( '/validate/email',
 );
 // CONFIRMS ADMIN CREDENTIALS
 /**
- * @api {post} /validate/login Validates login credentials and returns an OAuth token
+ * @api {post} /validate/login Validate Credentials
  * @apiName PostValidateLogin
+ * @apiVersion 0.0.1
  * @apiGroup Admin
+ *
+ * @apiParam {String} username Admin's email address.
+ * @apiParam {String} password Admin's hashed password; hashed via `sha256(pass+salt)``.
+ * @apiParam {String} client_id `mrct`
+ * @apiParam {String} client_secret `doascience`
+ * @apiParam {String} scope `basic`
+ * @apiParam {String} grant_type `password`
+ *
+ * @apiSuccess {String} token_type The value `Bearer`.
+ * @apiSuccess {Number} expires_in An integer representing the TTL of the access token.
+ * @apiSuccess {String} access_token A JWT signed with the authorization server’s private key.
+ * @apiSuccess {String} refresh_token An encrypted payload that can be used to refresh the access token when it expires.
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "token_type": "Bearer",
+ *       "expires_in": 3600,
+ *       "access_token": "abc...xyz",
+ *       "refresh_token": "abc...xyz"
+ *     }
+ *
+ * @apiError InvalidCredentials The <code>username</code> or <code>password</code> provided are incorrect.
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Unauthorized
+ *     {
+ *       "error": "invalid_credentials",
+ *       "message": "The user credentials were incorrect."
+ *     }
+ *
+ * @apiDescription Validates login credentials and returns OAuth access and refresh tokens.
+ *
+ */
+/**
+ * @api {post} /validate/login Validate Credentials
+ * @apiName PostRefreshToken
+ * @apiVersion 0.0.1
+ * @apiGroup Admin
+ *
+ * @apiParam {String} refresh_token Admin's `refresh_token` issued with an earlier `/login` call.
+ * @apiParam {String} client_id `mrct`
+ * @apiParam {String} client_secret `doascience`
+ * @apiParam {String} scope `basic`
+ * @apiParam {String} grant_type `refresh_token`
+ *
+ * @apiSuccess {String} token_type The value `Bearer`.
+ * @apiSuccess {Number} expires_in An integer representing the TTL of the access token.
+ * @apiSuccess {String} access_token A JWT signed with the authorization server’s private key.
+ * @apiSuccess {String} refresh_token An encrypted payload that can be used to refresh the access token when it expires.
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "token_type": "Bearer",
+ *       "expires_in": 3600,
+ *       "access_token": "abc...xyz",
+ *       "refresh_token": "abc...xyz"
+ *     }
+ *
+ * @apiError InvalidCredentials The <code>username</code> or <code>password</code> provided are incorrect.
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Unauthorized
+ *     {
+ *       "error": "invalid_request",
+ *       "message": "The refresh token is invalid.",
+ *       "hint": "Cannot decrypt the refresh token"
+ *     }
+ *
+ * @apiDescription Validates login credentials and returns OAuth access and refresh tokens.
  *
  */
 $app->post( '/validate/login',
@@ -182,9 +285,41 @@ $app->post( '/validate/login',
 
 // USER INFO
 /**
- * @api {get} /user/details Returns user details based on OAuth token
+ * @api {get} /user/details User Details
  * @apiName GetUserDetails
+ * @apiVersion 0.0.1
  * @apiGroup Admin
+ * @apiPermission admin
+ *
+ * @apiHeader {String} Authorization Admin's `access_token`.
+ * @apiHeaderExample {String} Header-Example:
+ *     {
+ *       "Authorization": "Bearer abc...xyz"
+ *     }
+ *
+ * @apiSuccess {String} uid User's unique ID.
+ * @apiSuccess {String} email User's email address.
+ * @apiSuccess {String} name User's name.
+ * @apiSuccess {String} role User's role.
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "uid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+ *       "email": "user@mail.ca",
+ *       "name": "Reece Ercher",
+ *       "role": "admin"
+ *     }
+ *
+ * @apiError AccessDenied The <code>access_token</code> provided has expired.
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Unauthorized
+ *     {
+ *       "error": "access_denied",
+ *       "message": "The resource owner or authorization server denied the request.",
+ *       "hint": "Access token is invalid"
+ *     }
+ *
+ * @apiDescription Returns user details based on the provided OAuth token.
  *
  */
 $app->get( '/user/details',
@@ -207,9 +342,19 @@ $app->get( '/user/details',
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
 // ADMIN LIST TRIALS
 /**
- * @api {get} /user/trials Returns an array of `Trials` belonging to the current Admin
+ * @api {get} /user/trials List Trials
  * @apiName GetUserTrials
+ * @apiVersion 0.0.1
  * @apiGroup Admin
+ * @apiPermission admin
+ *
+ * @apiHeader {String} Authorization Admin's `access_token`.
+ * @apiHeaderExample {String} Header-Example:
+ *     {
+ *       "Authorization": "Bearer abc...xyz"
+ *     }
+ *
+ * @apiDescription Returns an array of `Trials` belonging to the current Admin.
  *
  */
 $app->get( '/user/trials',
@@ -226,6 +371,7 @@ $app->get( '/user/trials',
 /**
  * @api {get} /trial/:tid Returns the complete details for a given Trial ID
  * @apiName GetTrial
+ * @apiVersion 0.0.1
  * @apiGroup Admin
  *
  */
@@ -245,6 +391,7 @@ $app->get( '/trial/{tid}',
 /**
  * @api {post} /new/trial Creates a new Trial
  * @apiName PostNewTrial
+ * @apiVersion 0.0.1
  * @apiGroup Admin
  *
  */
@@ -268,6 +415,7 @@ $app->post( '/new/trial',
 /**
  * @api {post} /register/:tid Registers a new Subject into a given Trial ID
  * @apiName PostRegisterForTrial
+ * @apiVersion 0.0.1
  * @apiGroup Subject
  *
  */
@@ -287,6 +435,7 @@ $app->post( '/register/{tid}',
 /**
  * @api {get} /trial/:tid/surveys Returns a list of Surveys from a given Trial ID for a given Subject ID
  * @apiName GetTrialSurveys
+ * @apiVersion 0.0.1
  * @apiGroup Subject
  *
  */
@@ -307,6 +456,7 @@ $app->get( '/trial/{tid}/surveys',
 /**
  * @api {post} /trial/:tid/survey/:sid Stores Survey answers to a given Trial and Survey
  * @apiName PostSurveyAnswers
+ * @apiVersion 0.0.1
  * @apiGroup Subject
  *
  */
