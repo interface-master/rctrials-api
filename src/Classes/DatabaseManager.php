@@ -146,7 +146,7 @@ class DatabaseManager {
 				$ret->surveys = $surveys;
 				$ret->status = 200;
 			} else {
-				$ret->status = 204;
+				$ret->status = 410;
 				$ret->message = "The registration window for this trial is closed.";
 			}
 		} catch( PDOException $e ) {
