@@ -133,6 +133,12 @@ $app->post( '/register',
 );
 
 // CONFIRMS ADMIN EMAIL IN THE SYSTEM
+/**
+ * @api {post} /validate/email Validates if an email address exists in the system
+ * @apiName PostValidateEmail
+ * @apiGroup Admin
+ *
+ */
 $app->post( '/validate/email',
 	function( Request $request, Response $response ) use ( $app ) {
 		$output = new \stdClass();
@@ -149,6 +155,12 @@ $app->post( '/validate/email',
 	}
 );
 // CONFIRMS ADMIN CREDENTIALS
+/**
+ * @api {post} /validate/login Validates login credentials and returns an OAuth token
+ * @apiName PostValidateLogin
+ * @apiGroup Admin
+ *
+ */
 $app->post( '/validate/login',
 	function( Request $request, Response $response ) use ( $app ) {
 		$server = $app->getContainer()->get(AuthorizationServer::class);
@@ -169,6 +181,12 @@ $app->post( '/validate/login',
 );
 
 // USER INFO
+/**
+ * @api {get} /user/details Returns user details based on OAuth token
+ * @apiName GetUserDetails
+ * @apiGroup Admin
+ *
+ */
 $app->get( '/user/details',
 	function( Request $request, Response $response ) use ( $app ) {
 		// $uid = $this->db->getUserFromAuth( $request->getHeader('authorization') );
@@ -188,6 +206,12 @@ $app->get( '/user/details',
 	}
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
 // ADMIN LIST TRIALS
+/**
+ * @api {get} /user/trials Returns an array of `Trials` belonging to the current Admin
+ * @apiName GetUserTrials
+ * @apiGroup Admin
+ *
+ */
 $app->get( '/user/trials',
 	function( Request $request, Response $response ) use ( $app ) {
 		$output = new \stdClass();
@@ -199,6 +223,12 @@ $app->get( '/user/trials',
 	}
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
 // ADMIN TRIAL DETAILS
+/**
+ * @api {get} /trial/:tid Returns the complete details for a given Trial ID
+ * @apiName GetTrial
+ * @apiGroup Admin
+ *
+ */
 $app->get( '/trial/{tid}',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
@@ -212,6 +242,12 @@ $app->get( '/trial/{tid}',
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
 
 // ADMIN NEW TRIAL
+/**
+ * @api {post} /new/trial Creates a new Trial
+ * @apiName PostNewTrial
+ * @apiGroup Admin
+ *
+ */
 $app->post( '/new/trial',
 	function( Request $request, Response $response ) use ( $app ) {
 		$output = new \stdClass();
@@ -229,6 +265,12 @@ $app->post( '/new/trial',
 
 
 // SUBJECT REGISTRATION
+/**
+ * @api {post} /register/:tid Registers a new Subject into a given Trial ID
+ * @apiName PostRegisterForTrial
+ * @apiGroup Subject
+ *
+ */
 $app->post( '/register/{tid}',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
@@ -242,6 +284,12 @@ $app->post( '/register/{tid}',
 );
 
 // TRIAL SURVEY LIST
+/**
+ * @api {get} /trial/:tid/surveys Returns a list of Surveys from a given Trial ID for a given Subject ID
+ * @apiName GetTrialSurveys
+ * @apiGroup Subject
+ *
+ */
 $app->get( '/trial/{tid}/surveys',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
@@ -256,6 +304,12 @@ $app->get( '/trial/{tid}/surveys',
 );
 
 // SUBJECT SURVEY POST
+/**
+ * @api {post} /trial/:tid/survey/:sid Stores Survey answers to a given Trial and Survey
+ * @apiName PostSurveyAnswers
+ * @apiGroup Subject
+ *
+ */
 $app->post( '/trial/{tid}/survey/{sid}',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
