@@ -157,9 +157,11 @@ $app->post( '/register',
 	}
 );
 
+// ########### vvv NEEDS TO BE REMOVED vvv ###########
 // CONFIRMS ADMIN EMAIL IN THE SYSTEM
 /**
  * @api {post} /validate/email Validate Email
+ * @apiPrivate
  * @apiName PostValidateEmail
  * @apiVersion 0.0.1
  * @apiGroup Admin
@@ -189,6 +191,8 @@ $app->post( '/validate/email',
 		return $response;
 	}
 );
+// ########### ^^^ NEEDS TO BE REMOVED ^^^ ###########
+
 // CONFIRMS ADMIN CREDENTIALS
 /**
  * @api {post} /validate/login Validate Credentials
@@ -228,7 +232,7 @@ $app->post( '/validate/email',
  *
  */
 /**
- * @api {post} /validate/login Validate Credentials
+ * @api {post} /validate/login Refresh Token
  * @apiName PostRefreshToken
  * @apiVersion 0.0.1
  * @apiGroup Admin
@@ -354,6 +358,21 @@ $app->get( '/user/details',
  *       "Authorization": "Bearer abc...xyz"
  *     }
  *
+ * @apiSuccess {Object[]} trials User's `Trials`.
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     [{
+ *       "tid": "xxxx",
+ *       "title": "Test Trial",
+ *       "regopen": "0000-00-00 00:00:00",
+ *       "regclose": "0000-00-00 00:00:00",
+ *       "trialstart": "0000-00-00 00:00:00",
+ *       "trialend": "0000-00-00 00:00:00",
+ *       "timezone": "TZ database name",
+ *       "created": "0000-00-00 00:00:00",
+ *       "updated": "0000-00-00 00:00:00"
+ *     }...]
+ *
  * @apiDescription Returns an array of `Trials` belonging to the current Admin.
  *
  */
@@ -369,10 +388,52 @@ $app->get( '/user/trials',
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
 // ADMIN TRIAL DETAILS
 /**
- * @api {get} /trial/:tid Returns the complete details for a given Trial ID
+ * @api {get} /trial/:tid Trial Details
  * @apiName GetTrial
  * @apiVersion 0.0.1
  * @apiGroup Admin
+ * @apiPermission admin
+ *
+ * @apiHeader {String} Authorization Admin's `access_token`.
+ * @apiHeaderExample {String} Header-Example:
+ *     {
+ *       "Authorization": "Bearer abc...xyz"
+ *     }
+ *
+ * @apiSuccess {Object[]} trials User's `Trials`.
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     [{
+ *       "tid": "xxxx",
+ *       "title": "Test Trial",
+ *       "regopen": "0000-00-00 00:00:00",
+ *       "regclose": "0000-00-00 00:00:00",
+ *       "trialstart": "0000-00-00 00:00:00",
+ *       "trialend": "0000-00-00 00:00:00",
+ *       "trialtype": "simple",
+ *       "timezone": "TZ database name",
+ *       "created": "0000-00-00 00:00:00",
+ *       "updated": "0000-00-00 00:00:00",
+ *       "groups": [{
+ *           "gid": ...,
+ *           "name": ...,
+ *           "size": ...,
+ *           "size_n": ...
+ *       },...],
+ *       "surveys": [{
+ *         "sid": ...,
+ *         "name": ...,
+ *         "groups: "[gid,...]",
+ *         "questions": [{
+ *           "qid": ...,
+ *           "text": ...,
+ *           "type": ...,
+ *           "options": ...
+ *         },...]
+ *       },...]
+ *     },...]
+ *
+ * @apiDescription Returns the complete details for a given Trial ID.
  *
  */
 $app->get( '/trial/{tid}',
@@ -389,10 +450,67 @@ $app->get( '/trial/{tid}',
 
 // ADMIN NEW TRIAL
 /**
- * @api {post} /new/trial Creates a new Trial
+ * @api {post} /new/trial New Trial
  * @apiName PostNewTrial
  * @apiVersion 0.0.1
  * @apiGroup Admin
+ * @apiPermission admin
+ *
+ * @apiParam {Object} trial Object representing the new `Trial`.
+ * @apiParamExample {Object} Request-Example:
+ *     {
+ *       "title": "Mental Health Trial",
+ *       "regopen":"2019-01-07T05:00:00.000Z",
+ *       "regclose":"2019-01-14T05:00:00.000Z",
+ *       "trialstart":"2019-01-14T05:00:00.000Z",
+ *       "trialend":"2019-01-18T05:00:00.000Z",
+ *       "trialtype":"simple",
+ *       "groups":[{
+ *         "group_id":0,
+ *         "group_name":"Control",
+ *         "group_size":"auto",
+ *         "group_size_n":""
+ *       },{
+ *         "group_id":1,
+ *         "group_name":"Experiment",
+ *         "group_size":"auto",
+ *         "group_size_n":""
+ *       }],
+ *       "features":[],
+ *       "surveys":[{
+ *         "survey_id":0,
+ *         "survey_name":"Demographics",
+ *         "survey_groups":[0,1],
+ *         "survey_questions":[{
+ *           "question_id":0,
+ *           "question_text":"What's your age?",
+ *           "question_type":"mc",
+ *           "question_options":"under 20|20-30|30-40|40-50|50+"
+ *         },{
+ *           "question_id":2,
+ *           "question_text":"What's your major?",
+ *           "question_type":"text",
+ *           "question_options":""
+ *         },...]
+ *       },...],
+ *       "timezone":"America/Toronto"}
+ *     }
+ *
+ * @apiHeader {String} Authorization Admin's `access_token`.
+ * @apiHeaderExample {String} Header-Example:
+ *     {
+ *       "Authorization": "Bearer abc...xyz"
+ *     }
+ *
+ * @apiSuccess {Object} confirmation Object confirming the ID of the newly generated trial, the number of groups, surveys, and questions that were created.
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "tid": "xxxx",
+ *       "groups": number,
+ *       "surveys": number,
+ *       "questions": number,
+ *     }
  *
  */
 $app->post( '/new/trial',
@@ -413,10 +531,28 @@ $app->post( '/new/trial',
 
 // SUBJECT REGISTRATION
 /**
- * @api {post} /register/:tid Registers a new Subject into a given Trial ID
+ * @api {post} /register/:tid Register
  * @apiName PostRegisterForTrial
  * @apiVersion 0.0.1
  * @apiGroup Subject
+ *
+ * @apiSuccess {String} uuid Unique identifier for the new subject.
+ * @apiSuccess {Object} surveys Object containing all the pre-intervention `Surveys` with `Questions`.
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+ *       "surveys": [...]
+ *     }
+ *
+ * @apiError RegistrationClosed The registration window for this trial has closed.
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 410 Gone
+ *     {
+ *       "message": "The registration window for this trial is closed."
+ *     }
+ *
+ * @apiDescription Creates a new `Subject` in a given `Trial`, and returns a unique identifier.
  *
  */
 $app->post( '/register/{tid}',
@@ -433,10 +569,34 @@ $app->post( '/register/{tid}',
 
 // TRIAL SURVEY LIST
 /**
- * @api {get} /trial/:tid/surveys Returns a list of Surveys from a given Trial ID for a given Subject ID
+ * @api {get} /trial/:tid/surveys Available Surveys
  * @apiName GetTrialSurveys
  * @apiVersion 0.0.1
  * @apiGroup Subject
+ *
+ * @apiParam {String} uuid Subject ID for whom to list available surveys.
+ *
+ * @apiSuccess {Object} surveys Object containing all the `Surveys` with `Questions` available to this `Subject`.
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "tid": "xxxx",
+ *       "sid": "#",
+ *       "name": "...",
+ *       "pre": "0",
+ *       "post": "0",
+ *       "during": "1",
+ *       "interval": "7",
+ *       "frequency": "days",
+ *       "questions": [{
+ *         "qid": "#",
+ *         "text": "...",
+ *         "type": "...",
+ *         "options": "...|...|...",
+ *       },...]
+ *     }
+ *
+ * @apiDescription Returns a list of Surveys from a given Trial ID for a given Subject ID.
  *
  */
 $app->get( '/trial/{tid}/surveys',
@@ -454,10 +614,22 @@ $app->get( '/trial/{tid}/surveys',
 
 // SUBJECT SURVEY POST
 /**
- * @api {post} /trial/:tid/survey/:sid Stores Survey answers to a given Trial and Survey
+ * @api {post} /trial/:tid/survey/:sid Survey Answers
  * @apiName PostSurveyAnswers
  * @apiVersion 0.0.1
  * @apiGroup Subject
+ *
+ * @apiParam {String} uuid Subject ID for whom to list available surveys.
+ * @apiParam {Object[]} answers An array of answers to be stored in the database.
+ * @apiParamExample {Object} Request-Example:
+ *     {
+ *       "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+ *       "answers":[{
+ *         "qid":..., "answer":...
+ *       },...]
+ *     }
+ *
+ * @apiDescription Stores the Answers to a given Trial and Survey.
  *
  */
 $app->post( '/trial/{tid}/survey/{sid}',
