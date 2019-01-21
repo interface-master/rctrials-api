@@ -1,9 +1,9 @@
 {
-  "name": "MRCT API",
-  "version": "0.0.1",
+  "name": "MRCTT API",
+  "version": "0.0.2",
   "description": "API for the Research Server",
-  "title": "MRCT Research Server API",
-  "url": "http://localhost",
+  "title": "MRCTT Research Server API",
+  "url": "",
   "order": [
     "PostRegister",
     "PostValidateEmail",

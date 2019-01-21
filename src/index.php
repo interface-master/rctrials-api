@@ -104,17 +104,14 @@ $app->add(function ($req, $res, $next) {
 
 // ADMIN REGISTRATION
 /**
- * @api {post} /register New User
+ * @api {post} /api/register New User
  * @apiName PostRegister
- * @apiVersion 0.0.1
+ * @apiVersion 0.0.2
  * @apiGroup Admin
  *
- * @apiParam {String} email Admin's email address.
- * @apiParam {String} hash Admin's hashed password address.
- * @apiParam {String} name Admin's name.
- * @apiParam {String=admin} role Admin's role.
- * @apiParam {String} pass `!! REMOVE THIS !!` actual password for testing.
- * @apiParam {String} salt `!! REMOVE THIS !!` salt used for hashing the password.
+ * @apiParam {String} email New User's email address.
+ * @apiParam {String} pass New User's password.
+ * @apiParam {String} name New User's name.
  *
  * @apiSuccess {String} id A Unique ID for the Admin.
  * @apiSuccessExample {json} Success-Response:
@@ -161,13 +158,13 @@ $app->post( API_ROOT.'/register',
 
 // CONFIRMS ADMIN CREDENTIALS
 /**
- * @api {post} /validate/login Validate Credentials
+ * @api {post} /api/validate/login Validate Login
  * @apiName PostValidateLogin
- * @apiVersion 0.0.1
+ * @apiVersion 0.0.2
  * @apiGroup Admin
  *
  * @apiParam {String} username Admin's email address.
- * @apiParam {String} password Admin's hashed password; hashed via `sha256(pass+salt)``.
+ * @apiParam {String} password Admin's password.
  * @apiParam {String} client_id `mrct`
  * @apiParam {String} client_secret `doascience`
  * @apiParam {String} scope `basic`
@@ -198,9 +195,9 @@ $app->post( API_ROOT.'/register',
  *
  */
 /**
- * @api {post} /validate/login Refresh Token
+ * @api {post} /api/validate/login Refresh Token
  * @apiName PostRefreshToken
- * @apiVersion 0.0.1
+ * @apiVersion 0.0.2
  * @apiGroup Admin
  *
  * @apiParam {String} refresh_token Admin's `refresh_token` issued with an earlier `/login` call.
@@ -255,9 +252,9 @@ $app->post( API_ROOT.'/validate/login',
 
 // USER INFO
 /**
- * @api {get} /user/details User Details
+ * @api {get} /api/user/details User Details
  * @apiName GetUserDetails
- * @apiVersion 0.0.1
+ * @apiVersion 0.0.2
  * @apiGroup Admin
  * @apiPermission admin
  *
@@ -313,9 +310,9 @@ $app->get( API_ROOT.'/user/details',
 
 // ADMIN LIST TRIALS
 /**
- * @api {get} /user/trials List Trials
+ * @api {get} /api/user/trials List Trials
  * @apiName GetUserTrials
- * @apiVersion 0.0.1
+ * @apiVersion 0.0.2
  * @apiGroup Admin
  * @apiPermission admin
  *
@@ -356,9 +353,9 @@ $app->get( API_ROOT.'/user/trials',
 
 // ADMIN TRIAL DETAILS
 /**
- * @api {get} /trial/:tid Trial Details
+ * @api {get} /api/trial/:tid Trial Details
  * @apiName GetTrial
- * @apiVersion 0.0.1
+ * @apiVersion 0.0.2
  * @apiGroup Admin
  * @apiPermission admin
  *
@@ -392,6 +389,11 @@ $app->get( API_ROOT.'/user/trials',
  *         "sid": ...,
  *         "name": ...,
  *         "groups: "[gid,...]",
+ *         "pre": bool,
+ *         "during": bool,
+ *         "post": bool,
+ *         "interval": number,
+ *         "frequency": [days|weeks|months],
  *         "questions": [{
  *           "qid": ...,
  *           "text": ...,
@@ -418,9 +420,9 @@ $app->get( API_ROOT.'/trial/{tid}',
 
 // ADMIN NEW TRIAL
 /**
- * @api {post} /new/trial New Trial
+ * @api {post} /api/new/trial New Trial
  * @apiName PostNewTrial
- * @apiVersion 0.0.1
+ * @apiVersion 0.0.2
  * @apiGroup Admin
  * @apiPermission admin
  *
@@ -449,6 +451,11 @@ $app->get( API_ROOT.'/trial/{tid}',
  *         "survey_id":0,
  *         "survey_name":"Demographics",
  *         "survey_groups":[0,1],
+ *         "survey_pre":"1",
+ *         "survey_during":"0",
+ *         "survey_post":"0",
+ *         "survey_interval":"1",
+ *         "survey_frequency":"days",
  *         "survey_questions":[{
  *           "question_id":0,
  *           "question_text":"What's your age?",
@@ -470,7 +477,10 @@ $app->get( API_ROOT.'/trial/{tid}',
  *       "Authorization": "Bearer abc...xyz"
  *     }
  *
- * @apiSuccess {Object} confirmation Object confirming the ID of the newly generated trial, the number of groups, surveys, and questions that were created.
+ * @apiSuccess {String} tid A unique 4-character string representing this trial.
+ * @apiSuccess {number} groups The number of groups that is recorded.
+ * @apiSuccess {number} surveys The number of surveys that are recorded.
+ * @apiSuccess {number} questions The number of questions that are recorded.
  * @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 200 OK
  *     {
@@ -499,9 +509,9 @@ $app->post( API_ROOT.'/new/trial',
 
 // SUBJECT REGISTRATION
 /**
- * @api {post} /register/:tid Register
+ * @api {post} /api/register/:tid Register
  * @apiName PostRegisterForTrial
- * @apiVersion 0.0.1
+ * @apiVersion 0.0.2
  * @apiGroup Subject
  *
  * @apiSuccess {String} uuid Unique identifier for the new subject.
@@ -541,9 +551,9 @@ $app->post( API_ROOT.'/register/{tid}',
 
 // TRIAL SURVEY LIST
 /**
- * @api {get} /trial/:tid/surveys Available Surveys
+ * @api {get} /api/trial/:tid/surveys Available Surveys
  * @apiName GetTrialSurveys
- * @apiVersion 0.0.1
+ * @apiVersion 0.0.2
  * @apiGroup Subject
  *
  * @apiParam {String} uuid Subject ID for whom to list available surveys.
@@ -586,9 +596,9 @@ $app->get( API_ROOT.'/trial/{tid}/surveys',
 
 // SUBJECT SURVEY POST
 /**
- * @api {post} /trial/:tid/survey/:sid Survey Answers
+ * @api {post} /api/trial/:tid/survey/:sid Survey Answers
  * @apiName PostSurveyAnswers
- * @apiVersion 0.0.1
+ * @apiVersion 0.0.2
  * @apiGroup Subject
  *
  * @apiParam {String} uuid Subject ID for whom to list available surveys.
