@@ -138,60 +138,25 @@ $app->add(function ($req, $res, $next) {
 $app->post( '/register',
 	function( Request $request, Response $response ) use ( $app ) {
 		$obj = new \stdClass();
+		$salt = bin2hex(openssl_random_pseudo_bytes(16));
 		$obj->email = $request->getParam('email');
 		$obj->pass = $request->getParam('pass'); // TODO: DO NOT SAVE THIS
 		$obj->name = $request->getParam('name');
-		$obj->role = $request->getParam('role');
-		$obj->salt = $request->getParam('salt');
-		$obj->hash = $request->getParam('hash');
+		$obj->role = 'admin';
+		$obj->salt = $salt;
+		$obj->hash = password_hash( $salt.$request->getParam('pass'), PASSWORD_BCRYPT );
 		// check if email exists
 		$output = $this->db->newAdmin( $obj );
 		// output
-		if( strlen($output->error) > 0 ) {
+		if( isset($output->error) && strlen($output->error) > 0 ) {
 			$response = $response->withStatus( $output->status );
 		}
-		$response = $response->withHeader( 'Content-type', 'application/json' );
 		unset( $output->status );
-		$response = $response->withJson( $output );
-		return $response;
-	}
-);
-
-// ########### vvv NEEDS TO BE REMOVED vvv ###########
-// CONFIRMS ADMIN EMAIL IN THE SYSTEM
-/**
- * @api {post} /validate/email Validate Email
- * @apiPrivate
- * @apiName PostValidateEmail
- * @apiVersion 0.0.1
- * @apiGroup Admin
- *
- * @apiParam {String} username Admin's email address.
- *
- * @apiSuccess {String} salt The salt that was added to the password for hashing.
- *
- * @apiDescription Validates if an email address exists in the system.
- *
- * TODO:
- * - potentially get rid of sending the salt back; should be stored by FE.
- * - currently, returns blank object if email doesn't exist
- */
-$app->post( '/validate/email',
-	function( Request $request, Response $response ) use ( $app ) {
-		$output = new \stdClass();
-		$email = $request->getParam('username');
-		$user = $this->db->getUserByEmail( $email );
-		if( $user !== false ) {
-			$output = array(
-				'salt' => $user->salt
-			);
-		}
 		$response = $response->withHeader( 'Content-type', 'application/json' );
 		$response = $response->withJson( $output );
 		return $response;
 	}
 );
-// ########### ^^^ NEEDS TO BE REMOVED ^^^ ###########
 
 // CONFIRMS ADMIN CREDENTIALS
 /**

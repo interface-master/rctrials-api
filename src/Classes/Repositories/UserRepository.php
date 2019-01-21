@@ -28,11 +28,7 @@ class UserRepository implements UserRepositoryInterface
 	) {
 		// Retrieve record from the db
 		$db = DatabaseManager::getInstance();
-
-		$obj = new \stdClass();
-		$obj->email = $username;
-		$obj->hash = $password;
-		$record = $db->getUserByLogin( $obj->email, $obj->hash );
+		$record = $db->getUserByLogin( $username, $password );
 
 		if( $record !== false ) {
 			return new UserEntity( $record->id );

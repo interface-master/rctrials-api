@@ -298,34 +298,28 @@ class DatabaseManager {
 	}
 
 	/**
-	 * Check login by extracting necessary info from request
-	 * internal function
-	 * NOT USED !?
-	 */
-	/*
-	public function getUserByRequest( $request ) {
-		$email = $request->getParam('username');
-		$hash = $request->getParam('password');
-		$refresh = $request->getParam('request_token');
-		$rows = $this->getUserByLogin( $email, $hash );
-		return $rows;
-	}
-	*/
-
-	/**
-	 * Check `users` table by email and hash
+	 * Check `users` table by email and salt+pass=hash
 	 * internal function
 	 */
-	public function getUserByLogin( $email, $hash ) {
+	public function getUserByLogin( $email, $pass ) {
+		$retVal = false;
+		// retrieve matching record
 		$stmt = $this->dbh->prepare(
 			"SELECT * FROM `users`
-			WHERE `email`=:email AND `hash`=:hash");
+			WHERE `email`=:email");
 		$stmt->execute(array(
-			'email' => $email,
-			'hash' => $hash
+			'email' => $email
 		));
-		$rows = $stmt->fetch(\PDO::FETCH_OBJ);
-		return $rows;
+		$user = $stmt->fetch(\PDO::FETCH_OBJ);
+		if( !$user ) {
+			return $retVal;
+		}
+		// test match
+		if( password_verify( $user->salt.$pass, $user->hash ) ) {
+			$retVal = $user;
+		}
+		// return user or false
+		return $retVal;
 	}
 
 	/**
