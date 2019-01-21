@@ -4,9 +4,9 @@ POST /register
 	-> email, passhash, salt, name, role
 	<- uuid
 
-POST /validate/email
-	-> username
-	<- salt
+X POST /validate/email
+X	-> username
+X	<- salt
 
 POST /validate/login
 	-> user, passhash
