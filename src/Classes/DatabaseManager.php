@@ -383,22 +383,59 @@ class DatabaseManager {
 	public function getUserTrials( $uid ) {
 		$stmt = $this->dbh->prepare(
 			"SELECT
-				`tid`, `title`,
-				`regopen`, `regclose`,
-				`trialstart`, `trialend`,
-				`trialtype`, `timezone`,
-				`created`, `updated`
+				`t`.`tid`, `t`.`title`,
+				`t`.`regopen`, `t`.`regclose`,
+				`t`.`trialstart`, `t`.`trialend`,
+				`t`.`trialtype`, `t`.`timezone`,
+				`t`.`created`, `t`.`updated`,
+				`s`.`subjects`,
+				`a`.`answers`
 			FROM
-				`trials`
-			WHERE
-				`uid` = :uid
-			ORDER BY `created` DESC"
+				(
+					SELECT
+						`tid`, `title`,
+						`regopen`, `regclose`,
+						`trialstart`, `trialend`,
+						`trialtype`, `timezone`,
+						`created`, `updated`
+					FROM
+						`trials`
+					WHERE
+						`uid` = :uid
+					ORDER BY `created` DESC
+				) AS `t`
+				LEFT JOIN
+				(
+					SELECT
+						`tid`,
+						count(id) AS `subjects`
+					FROM
+						`subjects`
+					GROUP BY
+						`tid`
+				) AS `s`
+				ON
+					(`t`.`tid` = `s`.`tid`)
+				LEFT JOIN
+				(
+					SELECT
+						`tid`,
+						COUNT(*) AS ANSWERS
+					FROM
+						`answers`
+					GROUP BY
+						`tid`
+				) AS `a`
+				ON
+					(`t`.`tid` = `a`.`tid`)
+			"
 		);
 		$stmt->execute(array(
 			'uid' => $uid
 		));
-		$rows = $stmt->fetchAll(\PDO::FETCH_OBJ);
-		return $rows;
+		$trials = $stmt->fetchAll(\PDO::FETCH_OBJ);
+		// return
+		return $trials;
 	}
 
 	/**
