@@ -442,7 +442,9 @@ class DatabaseManager {
 		// surveys
 		$stmt = $this->dbh->prepare(
 			"SELECT
-				`sid`, `name`, `groups`
+				`sid`, `name`, `groups`,
+				`pre`, `during`, `post`,
+				`interval`, `frequency`
 			FROM
 				`surveys`
 			WHERE
