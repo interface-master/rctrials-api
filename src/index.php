@@ -23,6 +23,7 @@ use MRCT\Repositories\RefreshTokenRepository;
 use MRCT\DatabaseManager;
 
 DEFINE( 'PATH_RSA_KEYS', 'file://'.__DIR__.'/../keys/' );
+DEFINE( 'API_ROOT', '/api' );
 
 $app = new \Slim\App([
 	'settings' => [
@@ -135,7 +136,7 @@ $app->add(function ($req, $res, $next) {
  * - remove pass and salt from being sent and stored
  * - return error when one of the required fields isn't sent
  */
-$app->post( '/register',
+$app->post( API_ROOT.'/register',
 	function( Request $request, Response $response ) use ( $app ) {
 		$obj = new \stdClass();
 		$salt = bin2hex(openssl_random_pseudo_bytes(16));
@@ -233,7 +234,7 @@ $app->post( '/register',
  * @apiDescription Validates login credentials and returns OAuth access and refresh tokens.
  *
  */
-$app->post( '/validate/login',
+$app->post( API_ROOT.'/validate/login',
 	function( Request $request, Response $response ) use ( $app ) {
 		$server = $app->getContainer()->get(AuthorizationServer::class);
 		try {
@@ -291,7 +292,7 @@ $app->post( '/validate/login',
  * @apiDescription Returns user details based on the provided OAuth token.
  *
  */
-$app->get( '/user/details',
+$app->get( API_ROOT.'/user/details',
 	function( Request $request, Response $response ) use ( $app ) {
 		// $uid = $this->db->getUserFromAuth( $request->getHeader('authorization') );
 		$output = new \stdClass();
@@ -309,6 +310,7 @@ $app->get( '/user/details',
 		return $response;
 	}
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
+
 // ADMIN LIST TRIALS
 /**
  * @api {get} /user/trials List Trials
@@ -341,7 +343,7 @@ $app->get( '/user/details',
  * @apiDescription Returns an array of `Trials` belonging to the current Admin.
  *
  */
-$app->get( '/user/trials',
+$app->get( API_ROOT.'/user/trials',
 	function( Request $request, Response $response ) use ( $app ) {
 		$output = new \stdClass();
 		$user = $this->db->getUserByAuth( $request->getAttribute('oauth_access_token_id') );
@@ -351,6 +353,7 @@ $app->get( '/user/trials',
 		return $response;
 	}
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
+
 // ADMIN TRIAL DETAILS
 /**
  * @api {get} /trial/:tid Trial Details
@@ -401,7 +404,7 @@ $app->get( '/user/trials',
  * @apiDescription Returns the complete details for a given Trial ID.
  *
  */
-$app->get( '/trial/{tid}',
+$app->get( API_ROOT.'/trial/{tid}',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
 		$user = $this->db->getUserByAuth( $request->getAttribute('oauth_access_token_id') );
@@ -478,7 +481,7 @@ $app->get( '/trial/{tid}',
  *     }
  *
  */
-$app->post( '/new/trial',
+$app->post( API_ROOT.'/new/trial',
 	function( Request $request, Response $response ) use ( $app ) {
 		$output = new \stdClass();
 		$user = $this->db->getUserByAuth( $request->getAttribute('oauth_access_token_id') );
@@ -520,7 +523,7 @@ $app->post( '/new/trial',
  * @apiDescription Creates a new `Subject` in a given `Trial`, and returns a unique identifier.
  *
  */
-$app->post( '/register/{tid}',
+$app->post( API_ROOT.'/register/{tid}',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
 		$tid = $args['tid'];
@@ -568,7 +571,7 @@ $app->post( '/register/{tid}',
  * @apiDescription Returns a list of Surveys from a given Trial ID for a given Subject ID.
  *
  */
-$app->get( '/trial/{tid}/surveys',
+$app->get( API_ROOT.'/trial/{tid}/surveys',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
 		$tid = $args['tid'];
@@ -601,7 +604,7 @@ $app->get( '/trial/{tid}/surveys',
  * @apiDescription Stores the Answers to a given Trial and Survey.
  *
  */
-$app->post( '/trial/{tid}/survey/{sid}',
+$app->post( API_ROOT.'/trial/{tid}/survey/{sid}',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
 		$tid = $args['tid'];
