@@ -465,12 +465,19 @@ class DatabaseManager {
 		// groups
 		$stmt = $this->dbh->prepare(
 			"SELECT
-				`gid`, `name`, `size`, `size_n`
+				`g`.`gid`, `g`.`name`, `g`.`size`, `g`.`size_n`,
+				COUNT(`s`.`id`) AS `subjects`
 			FROM
-				`groups`
+				`groups` AS `g`
+			LEFT JOIN
+				`subjects` AS `s`
+				ON (`s`.`tid`=`g`.`tid` AND `s`.`group`=`g`.`gid`)
 			WHERE
-				`tid` = :tid
-			ORDER BY `gid`;"
+				`g`.`tid` = :tid
+			GROUP BY
+				`s`.`tid`, `s`.`group`
+			ORDER BY
+				`g`.`gid`;"
 		);
 		$stmt->execute(array(
 			'tid' => $tid
@@ -514,6 +521,38 @@ class DatabaseManager {
 			$survey->questions = $questions;
 			array_push( $trial->surveys, $survey );
 		}
+		// subjects
+		$stmt = $this->dbh->prepare(
+			"SELECT
+				`s`.`group`, COUNT(`s`.`id`) AS `subjects`
+			FROM
+				`subjects` AS `s`
+			WHERE
+				`s`.`tid` = :tid
+			GROUP BY
+				`s`.`tid`,`s`.`group`;"
+		);
+		$stmt->execute(array(
+			'tid' => $tid
+		));
+		$trial->subjects = $stmt->fetchAll(\PDO::FETCH_OBJ);
+		// answers
+		$stmt = $this->dbh->prepare(
+			"SELECT
+				`sid`, `qid`,
+				COUNT(*) AS `answers`
+			FROM
+				`answers`
+			WHERE
+				`tid` = :tid
+			GROUP BY
+				`tid`, `sid`, `qid`;"
+		);
+		$stmt->execute(array(
+			'tid' => $tid
+		));
+		$trial->answers = $stmt->fetchAll(\PDO::FETCH_OBJ);
+		// return enriched object
 		return $trial;
 	}
 
