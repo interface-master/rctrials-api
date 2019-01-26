@@ -507,6 +507,36 @@ $app->post( API_ROOT.'/new/trial',
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
 
 
+// VALIDATE TRIAL
+/**
+ * @api {get} /api/validate/trial/:tid Validate Trial ID
+ * @apiName GetValidateTrial
+ * @apiVersion 0.0.2
+ * @apiGroup Subject
+ *
+ * @apiSuccess {number} found Count of trials found matching the Trial ID.
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "found": "1",
+ *     }
+ *
+ * @apiDescription Returns the count of trials matching the passed Trial ID. If no trials are found matching that ID, then zero (0) is returned.
+ *
+ */
+$app->get( API_ROOT.'/validate/trial/{tid}',
+	function( Request $request, Response $response, array $args ) use ( $app ) {
+		$output = new \stdClass();
+    $tid = $args['tid'];
+    $output = $this->db->validateTrial( $tid );
+    $output->found = intval($output->found);
+    $response = $response->withHeader( 'Content-type', 'application/json' );
+		$response = $response->withJson( $output );
+		return $response;
+	}
+);
+
+
 // SUBJECT REGISTRATION
 /**
  * @api {post} /api/register/:tid Register

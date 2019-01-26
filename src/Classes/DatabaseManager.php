@@ -556,6 +556,28 @@ class DatabaseManager {
 		return $trial;
 	}
 
+  /**
+   * returns count of trials matching the tid
+   */
+  public function validateTrial( $tid ) {
+    $found = new \stdClass();
+    $stmt = $this->dbh->prepare(
+      "SELECT
+        COUNT(`tid`) AS `found`
+      FROM
+        `trials`
+      WHERE
+        `tid` = :tid
+      ORDER BY `created` DESC;"
+    );
+    $stmt->execute(array(
+      'tid' => $tid
+    ));
+    $found = $stmt->fetch(\PDO::FETCH_OBJ);
+    // return count matching tid
+		return $found;
+  }
+
 	/**
 	 * Returns all the available surveys
 	 * for a given trial for the requesting user
