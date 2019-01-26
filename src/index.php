@@ -509,7 +509,7 @@ $app->post( API_ROOT.'/new/trial',
 
 // VALIDATE TRIAL
 /**
- * @api {get} /api/validate/trial/:tid Validate Trial ID
+ * @api {get} /api/validate/trial/:tid Validate Trial
  * @apiName GetValidateTrial
  * @apiVersion 0.0.2
  * @apiGroup Subject
@@ -518,7 +518,7 @@ $app->post( API_ROOT.'/new/trial',
  * @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "found": "1",
+ *       "found": 1,
  *     }
  *
  * @apiDescription Returns the count of trials matching the passed Trial ID. If no trials are found matching that ID, then zero (0) is returned.

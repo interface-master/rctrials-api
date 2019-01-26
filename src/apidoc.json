@@ -13,6 +13,7 @@
     "GetUserTrials",
     "GetTrial",
     "PostNewTrial",
+    "GetValidateTrial",
     "PostRegisterForTrial",
     "GetTrialSurveys",
     "PostSurveyAnswers"
