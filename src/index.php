@@ -615,7 +615,7 @@ $app->get( API_ROOT.'/trial/{tid}/surveys',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
 		$tid = $args['tid'];
-		$uid = $request->getParam('uuid');;
+		$uid = $request->getParam('uuid');
 		// output
 		$output = $this->db->getSubjectSurveys( $uid, $tid );
 		$response = $response->withHeader( 'Content-type', 'application/json' );
