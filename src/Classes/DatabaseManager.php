@@ -141,6 +141,13 @@ class DatabaseManager {
 					$questions = $stmt2->fetchAll(\PDO::FETCH_OBJ);
 					$survey->questions = $questions;
 				}
+				// process
+				foreach ( $surveys as $survey ) {
+					$survey->sid = intval($survey->sid);
+					foreach ($survey->questions as $question) {
+						$question->qid = intval($question->qid);
+					}
+				}
 				// output
 				$ret->uuid = $subject->uid;
 				$ret->surveys = $surveys;
@@ -556,27 +563,27 @@ class DatabaseManager {
 		return $trial;
 	}
 
-  /**
-   * returns count of trials matching the tid
-   */
-  public function validateTrial( $tid ) {
-    $found = new \stdClass();
-    $stmt = $this->dbh->prepare(
-      "SELECT
-        COUNT(`tid`) AS `found`
-      FROM
-        `trials`
-      WHERE
-        `tid` = :tid
-      ORDER BY `created` DESC;"
-    );
-    $stmt->execute(array(
-      'tid' => $tid
-    ));
-    $found = $stmt->fetch(\PDO::FETCH_OBJ);
-    // return count matching tid
+	/**
+	 * returns count of trials matching the tid
+	 */
+	public function validateTrial( $tid ) {
+		$found = new \stdClass();
+		$stmt = $this->dbh->prepare(
+			"SELECT
+				COUNT(`tid`) AS `found`
+			FROM
+				`trials`
+			WHERE
+				`tid` = :tid
+			ORDER BY `created` DESC;"
+		);
+		$stmt->execute(array(
+			'tid' => $tid
+		));
+		$found = $stmt->fetch(\PDO::FETCH_OBJ);
+		// return count matching tid
 		return $found;
-  }
+	}
 
 	/**
 	 * Returns all the available surveys
@@ -606,23 +613,11 @@ class DatabaseManager {
 						AND
 						FIND_IN_SET(`g`.`gid`, SUBSTRING( `s`.`groups`, 2, length(`s`.`groups`)-2 )) <> 0
 						AND
-						IF(
-							NOW() < `t`.`trialstart`,
-							`s`.`pre` = 1,
-							`s`.`pre` = 0
-						)
+						IF( NOW() < `t`.`trialstart`, `s`.`pre` = 1, 1)
 						AND
-						IF(
-							NOW() > `t`.`trialend`,
-							`s`.`post` = 1,
-							`s`.`post` = 0
-						)
+						IF( NOW() > `t`.`trialend`, `s`.`post` = 1, 1)
 						AND
-						IF(
-							NOW() > `t`.`trialstart` AND NOW() < `t`.`trialend`,
-							`s`.`during` = 1,
-							`s`.`during` = 0
-						)
+						IF( NOW() > `t`.`trialstart` AND NOW() < `t`.`trialend`, `s`.`during` = 1, 1 )
 					)
 				LEFT JOIN
 					`answers` AS `a`
@@ -676,6 +671,17 @@ class DatabaseManager {
 			$survey->questions = $questions;
 		}
 		// return
+		foreach ($surveys as $survey) {
+			$survey->sid = intval($survey->sid);
+			$survey->pre = intval($survey->pre);
+			$survey->post = intval($survey->post);
+			$survey->during = intval($survey->during);
+			$survey->interval = intval($survey->interval);
+			$survey->answers = intval($survey->answers);
+			foreach ($survey->questions as $question) {
+				$question->qid = intval($question->qid);
+			}
+		}
 		return $surveys;
 	}
 
