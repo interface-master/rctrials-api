@@ -527,10 +527,10 @@ $app->post( API_ROOT.'/new/trial',
 $app->get( API_ROOT.'/validate/trial/{tid}',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
-    $tid = $args['tid'];
-    $output = $this->db->validateTrial( $tid );
-    $output->found = intval($output->found);
-    $response = $response->withHeader( 'Content-type', 'application/json' );
+		$tid = $args['tid'];
+		$output = $this->db->validateTrial( $tid );
+		$output->found = intval($output->found);
+		$response = $response->withHeader( 'Content-type', 'application/json' );
 		$response = $response->withJson( $output );
 		return $response;
 	}
