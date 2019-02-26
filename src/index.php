@@ -413,7 +413,11 @@ $app->get( API_ROOT.'/trial/{tid}',
 		$tid = $args['tid'];
 		$output = $this->db->getTrialDetails( $user->uid, $tid );
 		$response = $response->withHeader( 'Content-type', 'application/json' );
-		$response = $response->withJson( $output );
+		if( sizeof($output) > 0 ) {
+			$response = $response->withJson( $output );
+		} else {
+			$response = $response->withStatus(204);
+		}
 		return $response;
 	}
 )->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
