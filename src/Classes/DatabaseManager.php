@@ -507,7 +507,7 @@ class DatabaseManager {
 		));
 		$surveys = $stmt->fetchAll(\PDO::FETCH_OBJ);
 		$trial->surveys = array();
-		foreach( $surveys as $key => $survey ) {
+		foreach( $surveys as $survey ) {
 			// questions
 			$stmt2 = $this->dbh->prepare(
 				"SELECT
@@ -525,10 +525,72 @@ class DatabaseManager {
 				'sid' => $survey->sid
 			));
 			$questions = $stmt2->fetchAll(\PDO::FETCH_OBJ);
+			// enrich questions with answer summaries
+			foreach( $questions as $question ) {
+				// determine if this is a one-off or time-series data:
+				$stmt2 = $this->dbh->prepare(
+					"SELECT AVG(c) AS `avg`
+					FROM (
+						SELECT `uid`, COUNT(*) AS `c`
+						FROM `answers`
+						WHERE `tid` = :tid AND qid = :qid
+						GROUP BY `uid`
+					) AS x;"
+				);
+				$stmt2->execute(array(
+					'tid' => $tid,
+					'qid' => $question->qid
+				));
+				$question->avgresponse = round(floatval( $stmt2->fetch(\PDO::FETCH_OBJ)->avg ));
+
+				if( $question->avgresponse <= 1 ) {
+					$stmt2 = $this->dbh->prepare(
+						"SELECT
+							`text`, COUNT(*) AS `count`
+						FROM
+							`answers`
+						WHERE
+							`tid` = :tid
+							AND
+							`qid` = :qid
+						GROUP BY
+							`qid`, `text`
+						ORDER BY `text`;"
+					);
+					$stmt2->execute(array(
+						'tid' => $tid,
+						'qid' => $question->qid
+					));
+					$question->totals = $stmt2->fetchAll(\PDO::FETCH_OBJ);
+				}
+				else {
+					$stmt2 = $this->dbh->prepare(
+						"SELECT
+							`uid`, `text`, `timestamp`
+						FROM
+							`answers`
+						WHERE
+							`tid` = :tid
+							AND
+							`qid` = :qid
+						ORDER BY
+							`uid`, `timestamp`;"
+					);
+					$stmt2->execute(array(
+						'tid' => $tid,
+						'qid' => $question->qid
+					));
+					$question->answers = $stmt2->fetchAll(\PDO::FETCH_OBJ);
+				}
+
+			}
+			// push questions+answers
 			$survey->questions = $questions;
 			array_push( $trial->surveys, $survey );
+			// question answers:
+			// select qid, text, count(*) as `count` from answers where tid='5858' group by `qid`, `text` order by `qid`;
 		}
-		// subjects
+		// subjects // TODO: this info is present under `groups` - determine if this block is necessary
 		$stmt = $this->dbh->prepare(
 			"SELECT
 				`s`.`group`, COUNT(`s`.`id`) AS `subjects`
