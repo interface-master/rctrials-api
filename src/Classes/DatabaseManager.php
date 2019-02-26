@@ -482,7 +482,7 @@ class DatabaseManager {
 			WHERE
 				`g`.`tid` = :tid
 			GROUP BY
-				`s`.`tid`, `s`.`group`
+				`g`.`gid`
 			ORDER BY
 				`g`.`gid`;"
 		);
