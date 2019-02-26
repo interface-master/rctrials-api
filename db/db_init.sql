@@ -7,9 +7,9 @@ CREATE TABLE `users` (
 	`salt` VARCHAR(32) NOT NULL,
 	`hash` VARCHAR(60) NOT NULL,
 	`email` VARCHAR(100) NOT NULL,
-	`pass` VARCHAR(100) NOT NULL,
 	`name` VARCHAR(100) NOT NULL,
 	`role` ENUM('root','admin','user') NOT NULL,
+	`valid` BOOLEAN NOT NULL DEFAULT FALSE,
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
