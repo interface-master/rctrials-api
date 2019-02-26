@@ -468,6 +468,7 @@ class DatabaseManager {
 			'tid' => $tid
 		));
 		$trial = $stmt->fetch(\PDO::FETCH_OBJ);
+		if( !$trial->tid ) { return null; } // !! terminate if no trials match this user id !!
 		unset( $trial->uid );
 		// groups
 		$stmt = $this->dbh->prepare(
