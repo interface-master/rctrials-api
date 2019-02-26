@@ -33,7 +33,7 @@ CREATE PROCEDURE bucket_subjects_into_groups(IN in_tid VARCHAR(4))
 	DECLARE group_count INT DEFAULT 0;
 	DECLARE current_group INT DEFAULT NULL;
 	-- declare cursor for subjects in this trial
-	DEClARE subject_cursor CURSOR FOR SELECT `id` FROM `subjects` WHERE `tid` = in_tid ORDER BY RAND();
+	DEClARE subject_cursor CURSOR FOR SELECT `id` FROM `subjects` WHERE `tid` = in_tid AND `group` IS NULL ORDER BY RAND();
 	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
 	SET group_count = (SELECT COUNT(*) AS `count` FROM `groups` WHERE `tid` = in_tid);
