@@ -49,15 +49,14 @@ class DatabaseManager {
 			$stmt = $this->dbh->prepare(
 				"INSERT INTO
 				`users`
-				(`id`,`salt`,`hash`,`email`,`pass`,`name`,`role`)
+				(`id`,`salt`,`hash`,`email`,`name`,`role`)
 				VALUES
-				( UUID(), :salt, :hash, :email, :pass, :name, :role );"
+				( UUID(), :salt, :hash, :email, :name, :role );"
 			);
 			$stmt->execute(array(
 				'salt' => $obj->salt,
 				'hash' => $obj->hash,
 				'email' => $obj->email,
-				'pass' => $obj->pass,
 				'name' => $obj->name,
 				'role' => $obj->role
 			));
