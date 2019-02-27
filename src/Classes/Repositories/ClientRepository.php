@@ -1,14 +1,11 @@
 <?php
 /**
- * @author      Michael Vinogradov <interface.master@gmail.com>
- * @copyright   Copyright (c) Michael Vinogradov
  * @license     http://mit-license.org/
- *
  * @link        https://github.com/thephpleague/oauth2-server
  */
-namespace MRCT\Repositories;
+namespace RCTrials\Repositories;
 use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
-use MRCT\Entities\ClientEntity;
+use RCTrials\Entities\ClientEntity;
 
 class ClientRepository implements ClientRepositoryInterface
 {

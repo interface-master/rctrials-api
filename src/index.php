@@ -14,13 +14,13 @@ use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use League\OAuth2\Server\Middleware\AuthorizationServerMiddleware;
 use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
 
-use MRCT\Repositories\ClientRepository;
-use MRCT\Repositories\AccessTokenRepository;
-use MRCT\Repositories\ScopeRepository;
-use MRCT\Repositories\UserRepository;
-use MRCT\Repositories\RefreshTokenRepository;
+use RCTrials\Repositories\ClientRepository;
+use RCTrials\Repositories\AccessTokenRepository;
+use RCTrials\Repositories\ScopeRepository;
+use RCTrials\Repositories\UserRepository;
+use RCTrials\Repositories\RefreshTokenRepository;
 
-use MRCT\DatabaseManager;
+use RCTrials\DatabaseManager;
 
 DEFINE( 'PATH_RSA_KEYS', 'file://'.__DIR__.'/../keys/' );
 DEFINE( 'API_ROOT', '/api' );

@@ -1,15 +1,12 @@
 <?php
 /**
- * @author      Michael Vinogradov <interface.master@gmail.com>
- * @copyright   Copyright (c) Michael Vinogradov
  * @license     http://mit-license.org/
- *
  * @link        https://github.com/thephpleague/oauth2-server
  */
-namespace MRCT\Repositories;
+namespace RCTrials\Repositories;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\ScopeRepositoryInterface;
-use MRCT\Entities\ScopeEntity;
+use RCTrials\Entities\ScopeEntity;
 class ScopeRepository implements ScopeRepositoryInterface
 {
     /**

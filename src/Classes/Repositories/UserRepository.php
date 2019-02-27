@@ -1,19 +1,16 @@
 <?php
 /**
- * @author      Michael Vinogradov <interface.master@gmail.com>
- * @copyright   Copyright (c) Michael Vinogradov
  * @license     http://mit-license.org/
- *
  * @link        https://github.com/thephpleague/oauth2-server
  */
-namespace MRCT\Repositories;
+namespace RCTrials\Repositories;
 use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\UserRepositoryInterface;
 
-use MRCT\DatabaseManager;
-use MRCT\Entities\AccessTokenEntity;
-use MRCT\Entities\UserEntity;
+use RCTrials\DatabaseManager;
+use RCTrials\Entities\AccessTokenEntity;
+use RCTrials\Entities\UserEntity;
 
 class UserRepository implements UserRepositoryInterface
 {

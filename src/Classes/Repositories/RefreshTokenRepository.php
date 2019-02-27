@@ -1,16 +1,13 @@
 <?php
 /**
- * @author      Michael Vinogradov <interface.master@gmail.com>
- * @copyright   Copyright (c) Michael Vinogradov
  * @license     http://mit-license.org/
- *
  * @link        https://github.com/thephpleague/oauth2-server
  */
-namespace MRCT\Repositories;
+namespace RCTrials\Repositories;
 use League\OAuth2\Server\Entities\RefreshTokenEntityInterface;
 use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
 
-use MRCT\Entities\RefreshTokenEntity;
+use RCTrials\Entities\RefreshTokenEntity;
 class RefreshTokenRepository implements RefreshTokenRepositoryInterface
 {
     /**
