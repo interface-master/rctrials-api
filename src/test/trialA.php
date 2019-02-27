@@ -30,7 +30,7 @@ DEFINE("sampleSize", 20);
 // connect to database for some direct manipulation
 $host = 'mysql';
 $port = '3306';
-$dbname = 'mrct';
+$dbname = 'rctrials';
 $user = 'root';
 $pass = 'rooot';
 $conn = "mysql:host=$host;dbname=$dbname;port=$port;charset=utf8mb4;";
