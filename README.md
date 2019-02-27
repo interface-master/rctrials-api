@@ -1,5 +1,5 @@
-# mrct-api
-Back End API for the Mobile RCT Platform
+# RCTrials-API
+Back End API for the RCTrials Platform
 
 
 # Setup
@@ -14,23 +14,23 @@ Back End API for the Mobile RCT Platform
 `docker build -t lamp .`  
 
 ### Set up the volume:
-`docker volume create mrct`  
-`docker volume inspect mrct`  
+`docker volume create rctrials`  
+`docker volume inspect rctrials`  
 
 ### Start MySQL:
-`docker run --name=mysql56 -v mrct:/var/lib/mysql -v ~/:/mnt/media -e MYSQL_ROOT_PASSWORD=rooot -p 3306:3306 -d mysql:5.6`  
+`docker run --name=mysql56 -v rctrials:/var/lib/mysql -v ~/:/mnt/media -e MYSQL_ROOT_PASSWORD=rooot -p 3306:3306 -d mysql:5.6`  
 #### Get into container:
 `docker exec -it mysql56 /bin/bash`  
 ##### A. Create DB
 `mysql -u root -p` _then enter `rooot`_  
-`CREATE DATABASE mrct`  
+`CREATE DATABASE rctrials`  
 `exit`  
 ##### B. Import
 Copy DB files from `/mnt/media` to local folder:  
-`mysql -u root -p mrct < db_init.sql` _then enter `rooot`_  
+`mysql -u root -p rctrials < db_init.sql` _then enter `rooot`_  
 ##### C. Sanity check
 `mysql -u root -p` _then enter `rooot`_  
-`use mrct;`  
+`use rctrials;`  
 `show tables;`  
 `describe users;`  
 `select * from users;`  
@@ -38,44 +38,60 @@ Copy DB files from `/mnt/media` to local folder:
 `exit` _exit the container_  
 
 ### Start Apache/PHP7:
-`docker run -ti --name=mrct -v ~/{folder}:/var/www/html -p 80:80 -p 443:443 --link mysql56:mysql -d lamp`  
+_share a mount volume to point directly to /var/www/html_  
+`docker run -ti --name=rctrials -v ~/{folder}/src:/var/www/html -v ~/{folder}/keys:/var/www/keys -p 80:80 -p 443:443 --link mysql56:mysql -d lamp`
+
+OR
 
 _share a mount volume and copy files into container_  
-`docker run -ti --name=mrct -v ~/Programming/mrct-api:/mnt/media -p 80:80 -p 443:443 --link mysql56:mysql -d lamp`  
+`docker run -ti --name=rctrials -v ~/{folder}:/mnt/media -p 80:80 -p 443:443 --link mysql56:mysql -d lamp`  
 #### Get into container:
-`docker exec -it mrct /bin/bash`  
+`docker exec -it rctrials /bin/bash`  
 #### Copy files to container:
 `cp -R /mnt/media/src/. /var/www/html/`  
 `cp -R /mnt/media/keys/. /var/www/keys/`  
 `chmod 755 /var/www/keys && chmod 600 /var/www/keys/private.key /var/www/keys/public.key`
 
-OR  
-_share a mount volume to point directly to /var/www/html_  
-`docker run -ti --name=mrct -v ~/Programming/mrct-api/src:/var/www/html -v ~/Programming/mrct-api/keys:/var/www/keys -p 80:80 -p 443:443 --link mysql56:mysql -d lamp`  
 
 #### Sanity check:
 Visit http://localhost/info.php and https://localhost/info.php  
 
 ### Install Composer / Slim framework
 #### Get into the container:
-`docker exec -it mrct /bin/bash`  
+`docker exec -it rctrials /bin/bash`  
 #### Download Composer:
+Go here https://getcomposer.org/download/ for latest instructions and run the code similar to this:  
 ```
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-php -r "if (hash_file('SHA384', 'composer-setup.php') === '544e09ee996cdf60ece3804abc52599c22b1f40f4323403c44d44fdfdd586475ca9813a858088ffbc1f233e9b180f061') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+php -r "if (hash_file('SHA384', 'composer-setup.php') === '...') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
 php composer-setup.php
 php -r "unlink('composer-setup.php');"
 ```
 #### Compose:
 `cd /var/www/html`  
+`php ~/composer.phar install`  
+
+This should update the project with the following packages:  
+(you shouldn't have to execute this manually)  
 ##### Install Slim
-`composer require slim/slim "^3.0"`  
+`composer require slim/slim "^3.0"`
 ##### Install OAuth2
 `composer require league/oauth2-server`  
-###### Follow instructions here on generating keys:
+
+#### Generate Keys:
+##### Follow instructions here on generating keys:
 https://oauth2.thephpleague.com/installation/  
+
+`cd /var/www/keys`
 `openssl genrsa -out private.key 2048`  
 `openssl rsa -in private.key -pubout -out public.key`  
+`chmod 755 /var/www/keys && chmod 600 /var/www/keys/private.key /var/www/keys/public.key`  
+
+Afterwards, if you wish for `git` to ignore the file with the real keys, execute the following:  
+`git update-index --assume-unchanged private.key public.key`  
+and when you wish for `git` to look for changes again, run:  
+`git update-index --no-assume-unchanged private.key public.key`  
+
 
 ### Add personal Classes
 #### Update composer.json
@@ -84,7 +100,7 @@ Update `composer.json` to include the following object:
 {
   "autoload": {
     "psr-4": {
-      "NAMESPACE\\": "dir/"
+      "RCTrials\\": "dir/"
     }
   }
 }
@@ -93,14 +109,5 @@ Update `composer.json` to include the following object:
 `composer dump-autoload`
 
 
-
-## Step 2 - WebApp
-
-### Install Angular CLI:
-https://angular.io/guide/quickstart  
-`npm install -g @angular/cli`  
-
-### Create new project:
-`ng new mrct`
-#### Move files into root of git repo:
-`cd mrct && mv * ../ && cd .. && rm -rf mrct`
+#### Sanity check:
+Visit https://localhost/api/  
