@@ -1,21 +1,21 @@
 {
-  "name": "MRCTT API",
-  "version": "0.0.2",
-  "description": "API for the Research Server",
-  "title": "MRCTT Research Server API",
-  "url": "",
-  "order": [
-    "PostRegister",
-    "PostValidateEmail",
-    "PostValidateLogin",
-    "PostRefreshToken",
-    "GetUserDetails",
-    "GetUserTrials",
-    "GetTrial",
-    "PostNewTrial",
-    "GetValidateTrial",
-    "PostRegisterForTrial",
-    "GetTrialSurveys",
-    "PostSurveyAnswers"
-  ]
+	"name": "RCTrials API",
+	"version": "0.1.0",
+	"description": "API for the Research Server",
+	"title": "RCTrials Research Server API",
+	"url": "",
+	"order": [
+		"PostRegister",
+		"PostValidateEmail",
+		"PostValidateLogin",
+		"PostRefreshToken",
+		"GetUserDetails",
+		"GetUserTrials",
+		"GetTrial",
+		"PostNewTrial",
+		"GetValidateTrial",
+		"PostRegisterForTrial",
+		"GetTrialSurveys",
+		"PostSurveyAnswers"
+	]
 }

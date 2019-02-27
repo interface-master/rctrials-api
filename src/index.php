@@ -106,7 +106,7 @@ $app->add(function ($req, $res, $next) {
 /**
  * @api {post} /api/register New User
  * @apiName PostRegister
- * @apiVersion 0.0.2
+ * @apiVersion 0.1.0
  * @apiGroup Admin
  *
  * @apiParam {String} email New User's email address.
@@ -160,12 +160,12 @@ $app->post( API_ROOT.'/register',
 /**
  * @api {post} /api/validate/login Validate Login
  * @apiName PostValidateLogin
- * @apiVersion 0.0.2
+ * @apiVersion 0.1.0
  * @apiGroup Admin
  *
  * @apiParam {String} username Admin's email address.
  * @apiParam {String} password Admin's password.
- * @apiParam {String} client_id `mrct`
+ * @apiParam {String} client_id `rctrials.tk`
  * @apiParam {String} client_secret `doascience`
  * @apiParam {String} scope `basic`
  * @apiParam {String} grant_type `password`
@@ -197,11 +197,11 @@ $app->post( API_ROOT.'/register',
 /**
  * @api {post} /api/validate/login Refresh Token
  * @apiName PostRefreshToken
- * @apiVersion 0.0.2
+ * @apiVersion 0.1.0
  * @apiGroup Admin
  *
  * @apiParam {String} refresh_token Admin's `refresh_token` issued with an earlier `/login` call.
- * @apiParam {String} client_id `mrct`
+ * @apiParam {String} client_id `rctrials.tk`
  * @apiParam {String} client_secret `doascience`
  * @apiParam {String} scope `basic`
  * @apiParam {String} grant_type `refresh_token`
@@ -254,7 +254,7 @@ $app->post( API_ROOT.'/validate/login',
 /**
  * @api {get} /api/user/details User Details
  * @apiName GetUserDetails
- * @apiVersion 0.0.2
+ * @apiVersion 0.1.0
  * @apiGroup Admin
  * @apiPermission admin
  *
@@ -312,7 +312,7 @@ $app->get( API_ROOT.'/user/details',
 /**
  * @api {get} /api/user/trials List Trials
  * @apiName GetUserTrials
- * @apiVersion 0.0.2
+ * @apiVersion 0.1.0
  * @apiGroup Admin
  * @apiPermission admin
  *
@@ -355,7 +355,7 @@ $app->get( API_ROOT.'/user/trials',
 /**
  * @api {get} /api/trial/:tid Trial Details
  * @apiName GetTrial
- * @apiVersion 0.0.2
+ * @apiVersion 0.1.0
  * @apiGroup Admin
  * @apiPermission admin
  *
@@ -426,7 +426,7 @@ $app->get( API_ROOT.'/trial/{tid}',
 /**
  * @api {post} /api/new/trial New Trial
  * @apiName PostNewTrial
- * @apiVersion 0.0.2
+ * @apiVersion 0.1.0
  * @apiGroup Admin
  * @apiPermission admin
  *
@@ -515,7 +515,7 @@ $app->post( API_ROOT.'/new/trial',
 /**
  * @api {get} /api/validate/trial/:tid Validate Trial
  * @apiName GetValidateTrial
- * @apiVersion 0.0.2
+ * @apiVersion 0.1.0
  * @apiGroup Subject
  *
  * @apiSuccess {number} found Count of trials found matching the Trial ID.
@@ -545,7 +545,7 @@ $app->get( API_ROOT.'/validate/trial/{tid}',
 /**
  * @api {post} /api/register/:tid Register
  * @apiName PostRegisterForTrial
- * @apiVersion 0.0.2
+ * @apiVersion 0.1.0
  * @apiGroup Subject
  *
  * @apiSuccess {String} uuid Unique identifier for the new subject.
@@ -587,7 +587,7 @@ $app->post( API_ROOT.'/register/{tid}',
 /**
  * @api {get} /api/trial/:tid/surveys Available Surveys
  * @apiName GetTrialSurveys
- * @apiVersion 0.0.2
+ * @apiVersion 0.1.0
  * @apiGroup Subject
  *
  * @apiParam {String} uuid Subject ID for whom to list available surveys.
@@ -632,7 +632,7 @@ $app->get( API_ROOT.'/trial/{tid}/surveys',
 /**
  * @api {post} /api/trial/:tid/survey/:sid Survey Answers
  * @apiName PostSurveyAnswers
- * @apiVersion 0.0.2
+ * @apiVersion 0.1.0
  * @apiGroup Subject
  *
  * @apiParam {String} uuid Subject ID for whom to list available surveys.
