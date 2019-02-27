@@ -33,37 +33,6 @@ class UserRepository implements UserRepositoryInterface
 			return false;
 		}
 
-		// $obj->access_token = $tokenJWT->__toString(); // this is the token that's sent back to the user
-		// $obj->id_student = $tokenJWT->getClaim('sub', false); // this is the student id
-		// $obj->date_expires = date( "Y-m-d H:i:s", $tokenJWT->getClaim('exp', false) ); // this is when the token expires
-
-		// $output = $db->insertOne( 'tokens', ['email'=>$obj->email], $obj ); // table,filter,object
-		// return $output;
-
-
-		// search student_accounts for this login
-		// $tbl_accounts = $wpdb->prefix . 'ps_student_accounts';
-		// $sql = "SELECT * FROM $tbl_accounts WHERE `username`=%s AND `password`=%s";
-		// $query = $wpdb->prepare( $sql, $username, $password );
-		// $row = $wpdb->get_row( $query );
-		// // if found return user id
-		// if( isset($row) ) {
-		// 	return new UserEntity( $row->id_student );
-		// }
-
-		// // search group accounts for this login
-		// $tbl_accounts = $wpdb->prefix . 'ps_course_characters';
-		// $sql = "SELECT * FROM $tbl_accounts
-		// 	WHERE LCASE(CONCAT(`name`,`id_course`)) = LCASE(%s)
-		// 	AND LCASE(`pass`) = LCASE(%s)";
-		// $query = $wpdb->prepare( $sql, $username.$cid, $password );
-		// $row = $wpdb->get_row( $query );
-		// if( isset($row) ) {
-		// 	return new UserEntity( $row->id_character );
-		// }
-
-		// TODO: remove above this line !!
-
 		// otherwise return nothing
 		return;
 	}
