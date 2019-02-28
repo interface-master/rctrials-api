@@ -13,12 +13,13 @@ class DatabaseManager {
 
 	public static function getInstance() {
 		if (!isset(static::$instance)) {
-			// TODO: read from config
-			$host = 'mysql';
-			$port = '3306';
-			$dbname = 'rctrials';
-			$user = 'root';
-			$pass = 'rooot';
+			$dbConnInfo = file_get_contents( __DIR__ . "/dbconn.json");
+			$obj = json_decode($dbConnInfo, true);
+			$host = $obj['host'];
+			$port = $obj['port'];
+			$dbname = $obj['dbname'];
+			$user = $obj['user'];
+			$pass = $obj['pass'];
 			$conn = "mysql:host=$host;dbname=$dbname;port=$port;charset=utf8mb4;";
 			// instantiate
 			static::$instance = new DatabaseManager();
