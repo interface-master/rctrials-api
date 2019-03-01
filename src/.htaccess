@@ -1,3 +1,6 @@
+SetEnvIf Authorization (.*) HTTP_AUTHORIZATION=$1
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
 # API
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
