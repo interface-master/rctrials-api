@@ -25,6 +25,12 @@ use RCTrials\DatabaseManager;
 DEFINE( 'PATH_RSA_KEYS', 'file://'.__DIR__.'/../keys/' );
 DEFINE( 'API_ROOT', '/api' );
 
+// weird thing on 1&1 hosting
+if( !isset($_SERVER['HTTP_AUTHORIZATION']) && isset($_SERVER["REDIRECT_HTTP_AUTHORIZATION"]) ) {
+	$_SERVER['HTTP_AUTHORIZATION'] = $_SERVER["REDIRECT_HTTP_AUTHORIZATION"];
+}
+// /weird thing
+
 $app = new \Slim\App([
 	'settings' => [
 		'displayErrorDetails' => true, // TODO: remove this for production
