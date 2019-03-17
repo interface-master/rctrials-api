@@ -96,15 +96,15 @@ CREATE TABLE `trials` (
 DELIMITER //
 CREATE TRIGGER `trials_before_insert` BEFORE INSERT ON `trials`
 FOR EACH ROW BEGIN
-  DECLARE ready INT DEFAULT 0;
-  DECLARE rnd_str TEXT;
-  WHILE NOT READY DO
-    SET rnd_str := LEFT( UUID(), 4 );
-    IF NOT EXISTS (SELECT * FROM `trials` WHERE `tid` = rnd_str) THEN
-      SET new.tid = rnd_str;
-      SET ready := 1;
-    END IF;
-  END WHILE;
+	DECLARE ready INT DEFAULT 0;
+	DECLARE rnd_str TEXT;
+	WHILE NOT READY DO
+		SET rnd_str := LEFT( UUID(), 4 );
+		IF NOT EXISTS (SELECT * FROM `trials` WHERE `tid` = rnd_str) THEN
+			SET new.tid = rnd_str;
+			SET ready := 1;
+		END IF;
+	END WHILE;
 END;//
 DELIMITER ;
 
