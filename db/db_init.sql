@@ -23,12 +23,19 @@ CREATE TABLE `subjects` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- CREATE A TRIGGER TO BUCKET SUBJECTS INTO GROUPS
+-- orders ascending by a random value multiplied by the number of subjects in that group already
+-- helps skew randomness towards groups with smaller counts
 DELIMITER //
 CREATE TRIGGER `subjects_before_insert` BEFORE INSERT ON `subjects`
 FOR EACH ROW BEGIN
-	DECLARE rnd_grp INT;
-	SET rnd_grp = (SELECT `gid` FROM `groups` WHERE `tid` = new.tid ORDER BY RAND() LIMIT 1);
-	SET new.group = rnd_grp;
+  DECLARE rnd_grp INT;
+  SET rnd_grp = (
+    SELECT `gid`
+    FROM `groups`
+    WHERE `tid` = new.tid
+    ORDER BY (RAND()*(SELECT COUNT(*) FROM `subjects` WHERE `tid` = new.tid AND `group`=`gid`)) ASC
+    LIMIT 1);
+  SET new.group = rnd_grp;
 END;//
 DELIMITER ;
 
