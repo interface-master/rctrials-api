@@ -555,6 +555,7 @@ class DatabaseManager {
 				));
 				$question->avgresponse = round(floatval( $stmt2->fetch(\PDO::FETCH_OBJ)->avg ));
 
+				// accumulate totals per question
 				if( $question->avgresponse <= 1 ) {
 					$stmt2 = $this->dbh->prepare(
 						"SELECT
@@ -575,6 +576,7 @@ class DatabaseManager {
 					));
 					$question->totals = $stmt2->fetchAll(\PDO::FETCH_OBJ);
 				}
+				// accumulate time-series data
 				else {
 					$stmt2 = $this->dbh->prepare(
 						"SELECT
