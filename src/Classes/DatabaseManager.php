@@ -530,11 +530,22 @@ class DatabaseManager {
 			foreach( $questions as $question ) {
 				// determine if this is a one-off or time-series data:
 				$stmt2 = $this->dbh->prepare(
+					// "SELECT AVG(c) AS `avg`
+					// FROM (
+					// 	SELECT `uid`, COUNT(*) AS `c`
+					// 	FROM `answers`
+					// 	WHERE `tid` = :tid AND qid = :qid
+					// 	GROUP BY `uid`
+					// ) AS x;"
 					"SELECT AVG(c) AS `avg`
 					FROM (
 						SELECT `uid`, COUNT(*) AS `c`
-						FROM `answers`
-						WHERE `tid` = :tid AND qid = :qid
+						FROM (
+							SELECT `uid`,`timestamp`,COUNT(*) AS `c`
+							FROM `answers`
+							WHERE `tid` = :tid AND `qid` = :qid
+							GROUP BY `timestamp`
+						) AS `x`
 						GROUP BY `uid`
 					) AS x;"
 				);
