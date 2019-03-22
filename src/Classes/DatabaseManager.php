@@ -777,13 +777,15 @@ class DatabaseManager {
 					VALUES
 					( :tid, :sid, :qid, :uid, :answer );"
 				);
-				$res = $stmt->execute(array(
-					'tid' => $tid,
-					'sid' => $sid,
-					'qid' => $answer->qid,
-					'uid' => $uid,
-					'answer' => $answer->answer
-				));
+				foreach( $ary as $text ) {
+					$res = $stmt->execute(array(
+						'tid' => $tid,
+						'sid' => $sid,
+						'qid' => $answer->qid,
+						'uid' => $uid,
+						'answer' => $text
+					));
+				}
 			}
 			return true;
 		} catch( PDOException $e ) {
