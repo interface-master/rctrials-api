@@ -765,6 +765,11 @@ class DatabaseManager {
 	public function saveSurveyAnswers( $uid, $tid, $sid, $answers ) {
 		try {
 			foreach( $answers as $key => $answer ) {
+				$ary = [ $answer->answer ]; // start with one item in array
+				if( strpos($answer->answer,"|") > -1 ) {
+					// fill with pipe-delimited answers if applicable
+					$ary = explode("|", $answer->answer);
+				}
 				$stmt = $this->dbh->prepare(
 					"INSERT INTO
 					`answers`
