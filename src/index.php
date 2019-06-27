@@ -42,8 +42,8 @@ $app = new \Slim\App([
 			new ClientRepository(),       // instance of ClientRepositoryInterface
 			new AccessTokenRepository(),  // instance of AccessTokenRepositoryInterface
 			new ScopeRepository(),        // instance of ScopeRepositoryInterface
-			PATH_RSA_KEYS.'private.key',  // path to private key
-			PATH_RSA_KEYS.'public.key'    // path to public key
+			PATH_RSA_KEYS.'rctrials.key',  // path to private key
+			PATH_RSA_KEYS.'rctrials.key'    // path to public key
 		);
 
 		// password grant
@@ -74,13 +74,13 @@ $app = new \Slim\App([
 	ResourceServer::class => function () {
 		$server = new ResourceServer(
 			new AccessTokenRepository(),
-			PATH_RSA_KEYS.'public.key'
+			PATH_RSA_KEYS.'rctrials.key'
 		);
 		return $server;
 	},
 	ResourceServerMiddleware::class => function() {
 		$AccessTokenRepository = new AccessTokenRepository();
-		$publicKeyPath = PATH_RSA_KEYS.'public.key';
+		$publicKeyPath = PATH_RSA_KEYS.'rctrials.key';
 		$server = new ResourceServer(
 			$accessTokenRepository,
 			$publicKeyPath
