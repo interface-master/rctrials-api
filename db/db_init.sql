@@ -1,7 +1,6 @@
-DROP TABLE IF EXISTS `users`;
-
 -- DEFINE USERS TABLE
 -- TO STORE ADMIN ACCOUNTS
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` VARCHAR(36) NOT NULL,
   `salt` VARCHAR(32) NOT NULL,
@@ -15,6 +14,7 @@ CREATE TABLE `users` (
 
 -- DEFINE SUBJECTS TABLE
 -- TO STORE TRIAL SUBJECT IDS
+DROP TABLE IF EXISTS `subjects`;
 CREATE TABLE `subjects` (
   `id` VARCHAR(36) NOT NULL,
   `tid` VARCHAR(4) NOT NULL,
@@ -40,50 +40,51 @@ END;//
 DELIMITER ;
 
 -- CREATE A STORED PROCEDURE THAT WILL BUCKET SUBJECTS INTO GROUPS
-DELIMITER //
-CREATE PROCEDURE bucket_subjects_into_groups(IN in_tid VARCHAR(4))
-  BEGIN
-  DECLARE done INT DEFAULT 0;
-  DECLARE current_subject VARCHAR(36);
-  -- counter to loop over available groups
-  DECLARE counter INT DEFAULT 0;
-  DECLARE group_count INT DEFAULT 0;
-  DECLARE current_group INT DEFAULT NULL;
-  -- declare cursor for subjects in this trial
-  DEClARE subject_cursor CURSOR FOR SELECT `id` FROM `subjects` WHERE `tid` = in_tid AND `group` IS NULL ORDER BY RAND();
-  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
-
-  SET group_count = (SELECT COUNT(*) AS `count` FROM `groups` WHERE `tid` = in_tid);
-
-  -- open the cursor to iterate over all subjects
-  OPEN subject_cursor;
-  assign_group: LOOP
-
-  FETCH subject_cursor INTO current_subject;
-
-  IF done THEN
-  LEAVE assign_group;
-  END IF;
-
-  -- assign group
-  SET current_group = (SELECT `gid` FROM `groups` WHERE `tid` = in_tid ORDER BY `gid` LIMIT 1 OFFSET counter);
-  UPDATE `subjects` SET `group` = current_group WHERE `id` = current_subject;
-
-  -- incremet loop counter
-  SET counter = counter + 1;
-  IF counter >= group_count THEN
-  SET counter = 0;
-  END IF;
-
-  END LOOP assign_group;
-  CLOSE subject_cursor;
-END;//
-DELIMITER ;
+-- DELIMITER //
+-- CREATE PROCEDURE bucket_subjects_into_groups(IN in_tid VARCHAR(4))
+--   BEGIN
+--   DECLARE done INT DEFAULT 0;
+--   DECLARE current_subject VARCHAR(36);
+--   -- counter to loop over available groups
+--   DECLARE counter INT DEFAULT 0;
+--   DECLARE group_count INT DEFAULT 0;
+--   DECLARE current_group INT DEFAULT NULL;
+--   -- declare cursor for subjects in this trial
+--   DEClARE subject_cursor CURSOR FOR SELECT `id` FROM `subjects` WHERE `tid` = in_tid AND `group` IS NULL ORDER BY RAND();
+--   DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+--
+--   SET group_count = (SELECT COUNT(*) AS `count` FROM `groups` WHERE `tid` = in_tid);
+--
+--   -- open the cursor to iterate over all subjects
+--   OPEN subject_cursor;
+--   assign_group: LOOP
+--
+--   FETCH subject_cursor INTO current_subject;
+--
+--   IF done THEN
+--   LEAVE assign_group;
+--   END IF;
+--
+--   -- assign group
+--   SET current_group = (SELECT `gid` FROM `groups` WHERE `tid` = in_tid ORDER BY `gid` LIMIT 1 OFFSET counter);
+--   UPDATE `subjects` SET `group` = current_group WHERE `id` = current_subject;
+--
+--   -- incremet loop counter
+--   SET counter = counter + 1;
+--   IF counter >= group_count THEN
+--   SET counter = 0;
+--   END IF;
+--
+--   END LOOP assign_group;
+--   CLOSE subject_cursor;
+-- END;//
+-- DELIMITER ;
 
 
 -- DEFINE TOKENS TABLE
 -- STORES OAUTH TOKENS TO VALIDATE LOGINS
 -- ASSOCIATES TOKEN WITH USER ID
+DROP TABLE IF EXISTS `tokens`;
 CREATE TABLE `tokens` (
   `uid` VARCHAR(36) NOT NULL,
   `tid` TEXT,
@@ -94,6 +95,7 @@ CREATE TABLE `tokens` (
 
 -- DEFINE TRIALS TABLE
 -- STORES DETAILS ABOUT TRIAL DATES, USER, TIMEZONE
+DROP TABLE IF EXISTS `trials`;
 CREATE TABLE `trials` (
   `tid` VARCHAR(4) NOT NULL,
   `uid` VARCHAR(36) NOT NULL,
@@ -104,12 +106,13 @@ CREATE TABLE `trials` (
   `trialend` DATETIME NOT NULL,
   `trialtype` ENUM('simple') NOT NULL,
   `timezone` VARCHAR(32),
-  `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `updated` TIMESTAMP DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP,
+  `created` TIMESTAMP DEFAULT 0,
+  `updated` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`tid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- CREATE A TRIGGER TO GENERATE UNIQUE 4-CHAR IDS FOR TRIALS
+DROP TRIGGER IF EXISTS `trials_before_insert`;
 DELIMITER //
 CREATE TRIGGER `trials_before_insert` BEFORE INSERT ON `trials`
 FOR EACH ROW BEGIN
@@ -127,6 +130,7 @@ DELIMITER ;
 
 -- DEFINE GROUPS TABLE
 -- STORES TRIAL GROUP SIZE AND NAME
+DROP TABLE IF EXISTS `groups`;
 CREATE TABLE `groups` (
   `tid` VARCHAR(4) NOT NULL,
   `gid` SMALLINT NOT NULL,
@@ -138,6 +142,7 @@ CREATE TABLE `groups` (
 
 -- DEFINE SURVEYS TABLE
 -- STORES NAME AND GROUPS FOR SURVEYS
+DROP TABLE IF EXISTS `surveys`;
 CREATE TABLE `surveys` (
   `tid` VARCHAR(4) NOT NULL,
   `sid` SMALLINT NOT NULL,
@@ -150,6 +155,10 @@ CREATE TABLE `surveys` (
   `frequency` ENUM('days','weeks','months') DEFAULT 'days',
   PRIMARY KEY (`tid`,`sid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- CLEAR TABLES IN RIGHT ORDER TO AVOID CONSTRAINT VIOLATIONS
+DROP TABLE IF EXISTS `answers`;
+DROP TABLE IF EXISTS `questions`;
 
 -- DEFINE QUESTIONS TABLE
 -- STORES TRIAL, SURVEY, TEXT, AND OPTIONS
