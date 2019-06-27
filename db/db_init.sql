@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS `rctrials`;
+USE `rctrials`;
+
 DROP TABLE IF EXISTS `users`;
 
 -- DEFINE USERS TABLE
@@ -104,7 +107,7 @@ CREATE TABLE `trials` (
   `trialend` DATETIME NOT NULL,
   `trialtype` ENUM('simple') NOT NULL,
   `timezone` VARCHAR(32),
-  `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `created` TIMESTAMP DEFAULT 0,
   `updated` TIMESTAMP DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`tid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
