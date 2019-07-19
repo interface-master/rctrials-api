@@ -81,6 +81,9 @@ EOF
 
 openssl x509 -req -days 365 -in rctrials.csr -signkey rctrials.key -out rctrials.crt
 
+sudo chmod 600 rctrials.*
+sudo chown www-data:www-data rctrials.*
+
 # The following lines can be used to directly replace the certificates
 # at the default apache locations. However, if custom .config files are used
 # then the locations of the .crt and .key files are specified.
