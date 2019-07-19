@@ -102,7 +102,11 @@ sudo mysql -uroot -prooot < /sql/db_init.sql
 # Install Composer
 #######################################
 
-cd ~
+cd /
+sudo mkdir composer
+sudo chown vagrant:vagrant composer/
+cd composer
+
 EXPECTED_SIGNATURE="$(wget -q -O - https://composer.github.io/installer.sig)"
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
 ACTUAL_SIGNATURE="$(php -r "echo hash_file('sha384', 'composer-setup.php');")"
@@ -124,7 +128,7 @@ rm composer-setup.php
 #######################################
 
 cd /var/www/html
-php ~/composer.phar install
+php /composer/composer.phar install
 
 
 #######################################
