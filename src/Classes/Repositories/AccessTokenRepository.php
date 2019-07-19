@@ -22,7 +22,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface {
 		$db = DatabaseManager::getInstance();
 
 		// get the token and necessary info
-		$privateKey = new CryptKey( 'file://' . __DIR__ . '/../../../ssh/rctrials.key' );
+		$privateKey = new CryptKey( 'file://' . __DIR__ . '/../../../../../ssl/rctrials.key' );
 		$tokenJWT = $accessTokenEntity->convertToJWT( $privateKey );
 
 		$obj = new \stdClass();

@@ -22,7 +22,7 @@ use RCTrials\Repositories\RefreshTokenRepository;
 
 use RCTrials\DatabaseManager;
 
-DEFINE( 'PATH_RSA_KEYS', 'file://'.__DIR__.'/../keys/' );
+DEFINE( 'PATH_RSA_KEYS', 'file://'.__DIR__.'/../../../ssl/' );
 DEFINE( 'API_ROOT', '/api' );
 
 // weird thing on 1&1 hosting
@@ -43,7 +43,7 @@ $app = new \Slim\App([
 			new AccessTokenRepository(),  // instance of AccessTokenRepositoryInterface
 			new ScopeRepository(),        // instance of ScopeRepositoryInterface
 			PATH_RSA_KEYS.'rctrials.key',  // path to private key
-			PATH_RSA_KEYS.'rctrials.key'    // path to public key
+			PATH_RSA_KEYS.'rctrials.crt'    // path to public key
 		);
 
 		// password grant
@@ -74,13 +74,13 @@ $app = new \Slim\App([
 	ResourceServer::class => function () {
 		$server = new ResourceServer(
 			new AccessTokenRepository(),
-			PATH_RSA_KEYS.'rctrials.key'
+			PATH_RSA_KEYS.'rctrials.crt'
 		);
 		return $server;
 	},
 	ResourceServerMiddleware::class => function() {
 		$AccessTokenRepository = new AccessTokenRepository();
-		$publicKeyPath = PATH_RSA_KEYS.'rctrials.key';
+		$publicKeyPath = PATH_RSA_KEYS.'rctrials.crt';
 		$server = new ResourceServer(
 			$accessTokenRepository,
 			$publicKeyPath
