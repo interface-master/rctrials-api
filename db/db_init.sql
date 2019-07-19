@@ -171,7 +171,7 @@ CREATE TABLE `questions` (
   `qid` SMALLINT NOT NULL,
   `text` VARCHAR(100) NOT NULL,
   `type` ENUM('text','likert','slider','radio','check') NOT NULL DEFAULT 'text',
-  `options` VARCHAR(200),
+  `options` VARCHAR(500),
   PRIMARY KEY (`tid`,`sid`,`qid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
