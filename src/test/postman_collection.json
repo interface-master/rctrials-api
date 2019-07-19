@@ -1,0 +1,434 @@
+{
+	"info": {
+		"_postman_id": "1fa1bb44-aca5-4b0d-9245-f77eca254438",
+		"name": "RCTrials",
+		"description": "RCTrials Server API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "New Admin User",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "email",
+							"value": "test@test.com",
+							"type": "text"
+						},
+						{
+							"key": "pass",
+							"value": "abc",
+							"type": "text"
+						},
+						{
+							"key": "name",
+							"value": "Test",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "test@test.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "abc",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "rctrials.tk",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "doascience",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "basic",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/validate/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"validate",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh Token",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "refresh_token",
+							"value": "... insert refresh token here ...",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "rctrials.tk",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "doascience",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "basic",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "refresh_token",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/validate/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"validate",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Details",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessToken",
+							"value": "... insert access token here ...",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/user/details",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"user",
+						"details"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Trials",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessToken",
+							"value": "... insert access token here ...",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/user/trials",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"user",
+						"trials"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Trial",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessToken",
+							"value": "... insert access token here ...",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "trial",
+							"value": "{\n   \"title\":\"Test Trial\",\n   \"regopen\":\"2019-01-01T05:00:00.000Z\",\n   \"regclose\":\"2119-01-01T05:00:00.000Z\",\n   \"trialstart\":\"2019-01-01T05:00:00.000Z\",\n   \"trialend\":\"2119-01-01T05:00:00.000Z\",\n   \"trialtype\":\"simple\",\n   \"groups\":[\n      {\n         \"group_id\":0,\n         \"group_name\":\"Control\",\n         \"group_size\":\"auto\",\n         \"group_size_n\":\"\"\n      },\n      {\n         \"group_id\":1,\n         \"group_name\":\"Experiment\",\n         \"group_size\":\"auto\",\n         \"group_size_n\":\"\"\n      }\n   ],\n   \"surveys\":[\n      {\n         \"survey_id\":0,\n         \"survey_name\":\"Demographics\",\n         \"survey_groups\":[\n            0,\n            1\n         ],\n         \"survey_pre\":\"1\",\n         \"survey_during\":\"0\",\n         \"survey_post\":\"0\",\n         \"survey_interval\":\"1\",\n         \"survey_frequency\":\"days\",\n         \"survey_questions\":[\n            {\n               \"question_id\":0,\n               \"question_text\":\"What is your age?\",\n               \"question_type\":\"slider\",\n               \"question_options\":\"Under 18 | 18-24 years old | 25-34 years old | 35-44 years old | 45-54 years old | Over 55\"\n            },\n            {\n               \"question_id\":2,\n               \"question_text\":\"With which gender do you most identify?\",\n               \"question_type\":\"radio\",\n               \"question_options\":\"Prefer not to say | Female | Male | Other\"\n            },\n            {\n               \"question_id\":3,\n               \"question_text\":\"What is your ethnicity?\",\n               \"question_type\":\"radio\",\n               \"question_options\":\"Prefer not to say | White | Hispanic or Latino | Black or African American | Native | Asian / Pacific Islander | Other\"\n            },\n            {\n               \"question_id\":4,\n               \"question_text\":\"What is the highest degree or level of school you have completed?\",\n               \"question_type\":\"radio\",\n               \"question_options\":\"Less than a high school diploma | High school degree or equivalent | Bachelor's degree (e.g. BA, BS) | Master's degree (e.g. MA, MS, MEd) | Doctorate (e.g. PhD, EdD) | Other\"\n            },\n            {\n               \"question_id\":5,\n               \"question_text\":\"What is your current employment status?\",\n               \"question_type\":\"radio\",\n               \"question_options\":\"Employed full-time (40+ hours a week) | Employed part-time (less than 40 hours a week) | Unemployed (currently looking for work) | Unemployed (not currently looking for work) | Student | Retired | Self-employed | Unable to work\"\n            },\n            {\n               \"question_id\":6,\n               \"question_text\":\"Where do you reside?\",\n               \"question_type\":\"text\",\n               \"question_options\":\"\"\n            },\n            {\n               \"question_id\":7,\n               \"question_text\":\"What is your marital status?\",\n               \"question_type\":\"radio\",\n               \"question_options\":\"Single (never married) | Married | In a domestic partnership | Divorced | Widowed\"\n            },\n            {\n               \"question_id\":8,\n               \"question_text\":\"What is your household income?\",\n               \"question_type\":\"radio\",\n               \"question_options\":\"Below $10k | $10 - $50k | $50k - $100k | $100k - $150k | Over $150k\"\n            }\n         ]\n      },\n      {\n         \"survey_id\":1,\n         \"survey_name\":\"PHQ-4\",\n         \"survey_groups\":[\n            0,\n            1\n         ],\n         \"survey_pre\":\"0\",\n         \"survey_during\":\"1\",\n         \"survey_post\":\"0\",\n         \"survey_interval\":\"7\",\n         \"survey_frequency\":\"days\",\n         \"survey_questions\":[\n            {\n               \"question_id\":1,\n               \"question_text\":\"Feeling nervous, anxious, or on edge\",\n               \"question_type\":\"likert\",\n               \"question_options\":\"Not at all [0] | Several days [1] | More than half the days [2] | Nearly every day [3]\"\n            },\n            {\n               \"question_id\":11,\n               \"question_text\":\"Not being able to stop or control worrying\",\n               \"question_type\":\"likert\",\n               \"question_options\":\"Not at all [0] | Several days [1] | More than half the days [2] | Nearly every day [3]\"\n            },\n            {\n               \"question_id\":12,\n               \"question_text\":\"Little interest or pleasure in doing things\",\n               \"question_type\":\"likert\",\n               \"question_options\":\"Not at all [0] | Several days [1] | More than half the days [2] | Nearly every day [3]\"\n            },\n            {\n               \"question_id\":13,\n               \"question_text\":\"Feeling down, depressed, or hopeless\",\n               \"question_type\":\"likert\",\n               \"question_options\":\"Not at all [0] | Several days [1] | More than half the days [2] | Nearly every day [3]\"\n            }\n         ]\n      }\n   ],\n   \"timezone\":\"America/Toronto\"\n}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/new/trial",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"new",
+						"trial"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Trial ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/validate/trial/:tid",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"validate",
+						"trial",
+						":tid"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/register/:tid",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"register",
+						":tid"
+					]
+				},
+				"description": "Register with the Research Server to receive a UUID"
+			},
+			"response": []
+		},
+		{
+			"name": "Available Surveys",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "uuid",
+							"value": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/trial/:tid/surveys",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"trial",
+						":tid",
+						"surveys"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Survey Answers",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "uuid",
+							"value": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+							"type": "text"
+						},
+						{
+							"key": "answers",
+							"value": "[{\"qid\":1,\"answer\":\"Several days [1]\"},{\"qid\":11,\"answer\":\"Several days [1]\"}, {\"qid\":12, \"answer\":\"Several days [1]\"}, {\"qid\":13, \"answer\":\"Several days [1]\"}]",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/trial/:tid/survey/:sid",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"trial",
+						":tid",
+						"survey",
+						":sid"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
