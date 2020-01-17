@@ -84,7 +84,11 @@ class DatabaseManager {
 				"SELECT COUNT(*) AS `count`
 				FROM `trials`
 				WHERE `regopen` <= NOW()
-				AND `regclose` > NOW()
+				AND (
+        `regclose` > NOW()
+        OR
+        `regclose` = 0
+        )
 				AND `tid` = :tid;"
 			);
 			$stmt->execute(array(
@@ -691,9 +695,9 @@ class DatabaseManager {
 						AND
 						IF( NOW() < `t`.`trialstart`, `s`.`pre` = 1, 1)
 						AND
-						IF( NOW() > `t`.`trialend`, `s`.`post` = 1, 1)
+						IF( (`t`.`trialend` != 0 AND NOW() > `t`.`trialend`), `s`.`post` = 1, 1)
 						AND
-						IF( NOW() > `t`.`trialstart` AND NOW() < `t`.`trialend`, `s`.`during` = 1, 1 )
+						IF( NOW() > `t`.`trialstart` AND (NOW() < `t`.`trialend` OR `t`.`trialend` = 0), `s`.`during` = 1, 1 )
 					)
 				LEFT JOIN
 					`answers` AS `a`
