@@ -92,6 +92,11 @@ sudo chown www-data:www-data rctrials.*
 # sudo cp rctrials.key /etc/ssl/private/ssl-cert-snakeoil.key
 
 #######################################
+# Set up Date/Time
+#######################################
+sudo date -s "$(curl -I google.com 2>&1 | grep Date: | cut -d' ' -f3-6)Z"
+
+#######################################
 # Set up Database
 #######################################
 
