@@ -29,7 +29,7 @@ sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again p
 #######################################
 # Install PHP7, MySQL, Apache2
 
-sudo apt-get -y --force-yes install git unzip php7.0 mysql-server php7.0-mysql apache2 libapache2-mod-php7.0
+sudo apt-get -y --force-yes install git unzip php7.0 mysql-server php7.0-mysql apache2 libapache2-mod-php7.0 curl
 
 #######################################
 # Replace config files
@@ -133,6 +133,7 @@ rm composer-setup.php
 #######################################
 
 cd /var/www/html
+php /composer/composer.phar update
 php /composer/composer.phar install
 
 
