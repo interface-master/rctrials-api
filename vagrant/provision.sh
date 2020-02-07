@@ -73,7 +73,7 @@ Ontario
 Toronto
 RCTrials Project
 .
-Michael Vinogradov
+rctrials-research-server
 interface.master@gmail.com
 .
 .
