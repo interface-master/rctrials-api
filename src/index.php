@@ -660,7 +660,7 @@ $app->post( API_ROOT.'/trial/{tid}/survey/{sid}',
 		$tid = $args['tid'];
 		$sid = $args['sid'];
 		$uid = $request->getParam('uuid');
-		$answers = json_decode( $request->getParam('answers') );
+		$answers = $request->getParam('answers');
 		// output
 		$output->success = $this->db->saveSurveyAnswers( $uid, $tid, $sid, $answers );
 		$output->answers = $answers;
