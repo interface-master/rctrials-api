@@ -591,7 +591,7 @@ $app->post( API_ROOT.'/register/{tid}',
 
 // TRIAL SURVEY LIST
 /**
- * @api {get} /api/trial/:tid/surveys Available Surveys
+ * @api {post} /api/trial/:tid/surveys Available Surveys
  * @apiName GetTrialSurveys
  * @apiVersion 0.1.0
  * @apiGroup Subject
@@ -621,7 +621,7 @@ $app->post( API_ROOT.'/register/{tid}',
  * @apiDescription Returns a list of Surveys from a given Trial ID for a given Subject ID.
  *
  */
-$app->get( API_ROOT.'/trial/{tid}/surveys',
+$app->post( API_ROOT.'/trial/{tid}/surveys',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
 		$tid = $args['tid'];
