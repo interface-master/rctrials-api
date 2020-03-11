@@ -4,110 +4,180 @@ Back End API for the RCTrials Platform
 
 # Setup
 
-## Step 1 - API
+## Working Locally
 
-### For LAMP configuration, acquire Apache, PHP, and MySQL images:
-`docker pull nimmis/apache-php7`  
-`docker pull mysql:5.6`  
-
-### Clone `docker` repo, go to `docker/LAmP7` and run:
-`docker build -t lamp .`  
-
-### Set up the volume:
-`docker volume create rctrials`  
-`docker volume inspect rctrials`  
-
-### Start MySQL:
-`docker run --name=mysql56 -v rctrials:/var/lib/mysql -v ~/:/mnt/media -e MYSQL_ROOT_PASSWORD=rooot -p 3306:3306 -d mysql:5.6`  
-#### Get into container:
-`docker exec -it mysql56 /bin/bash`  
-##### A. Create DB
-`mysql -u root -p` _then enter `rooot`_  
-`CREATE DATABASE rctrials`  
-`exit`  
-##### B. Import
-Copy DB files from `/mnt/media` to local folder:  
-`mysql -u root -p rctrials < db_init.sql` _then enter `rooot`_  
-##### C. Sanity check
-`mysql -u root -p` _then enter `rooot`_  
-`use rctrials;`  
-`show tables;`  
-`describe users;`  
-`select * from users;`  
-`exit` _exit MySQL_  
-`exit` _exit the container_  
-
-### Start Apache/PHP7:
-_share a mount volume to point directly to /var/www/html_  
-`docker run -ti --name=rctrials -v ~/{folder}/src:/var/www/html -v ~/{folder}/keys:/var/www/keys -p 80:80 -p 443:443 --link mysql56:mysql -d lamp`
-
-OR
-
-_share a mount volume and copy files into container_  
-`docker run -ti --name=rctrials -v ~/{folder}:/mnt/media -p 80:80 -p 443:443 --link mysql56:mysql -d lamp`  
-#### Get into container:
-`docker exec -it rctrials /bin/bash`  
-#### Copy files to container:
-`cp -R /mnt/media/src/. /var/www/html/`  
-`cp -R /mnt/media/keys/. /var/www/keys/`  
-`chmod 755 /var/www/keys && chmod 600 /var/www/keys/private.key /var/www/keys/public.key`
-
-
-#### Sanity check:
-Visit http://localhost/info.php and https://localhost/info.php  
-
-### Install Composer / Slim framework
-#### Get into the container:
-`docker exec -it rctrials /bin/bash`  
-#### Download Composer:
-Go here https://getcomposer.org/download/ for latest instructions and run the code similar to this:  
+#### Launching Entire LAMP Stack
+Execute the following command to launch the `app` and `db` services:
 ```
-php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-php -r "if (hash_file('SHA384', 'composer-setup.php') === '...') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-php composer-setup.php
-php -r "unlink('composer-setup.php');"
+> docker-compose up
 ```
-#### Compose:
-`cd /var/www/html`  
-`php ~/composer.phar install`  
 
-This should update the project with the following packages:  
-(you shouldn't have to execute this manually)  
-##### Install Slim
-`composer require slim/slim "^3.0"`
-##### Install OAuth2
-`composer require league/oauth2-server`  
+#### Launching Each Container Individually
 
-#### Generate Keys:
-##### Follow instructions here on generating keys:
-https://oauth2.thephpleague.com/installation/  
+The order of operations is important during this process. The `app` service relies on the `db` service to be running, so the database should be built and launched first.
 
-`cd /var/www/keys`
-`openssl genrsa -out private.key 2048`  
-`openssl rsa -in private.key -pubout -out public.key`  
-`chmod 755 /var/www/keys && chmod 600 /var/www/keys/private.key /var/www/keys/public.key`  
+###### db
 
-Afterwards, if you wish for `git` to ignore the file with the real keys, execute the following:  
-`git update-index --assume-unchanged private.key public.key`  
-and when you wish for `git` to look for changes again, run:  
-`git update-index --no-assume-unchanged private.key public.key`  
-
-
-### Add personal Classes
-#### Update composer.json
-Update `composer.json` to include the following object:
+Execute the following command to run the `db` service:  
+_Linux:_
 ```
-{
-  "autoload": {
-    "psr-4": {
-      "RCTrials\\": "dir/"
-    }
-  }
-}
+> docker run --name=rctrials_db -v ./db/db_init.sql:/docker-entrypoint-initdb.d/00_db_init.sql -e TZ=America/Chicago -e MYSQL_ALLOW_EMPTY_PASSWORD=no -e MYSQL_ROOT_PASSWORD=rooot -e MYSQL_DATABASE=rctrials -e MYSQL_USER=rctrialsdbuser -e MYSQL_PASSWORD=rctrialsdbpassword -p 3306:3306 -d mariadb:10.5
 ```
-#### Regenerate autoload files
-`composer dump-autoload`
+_Windows:_
+```
+> docker run --name=rctrials_db -v C:\RCTrials\db\db_init.sql:/docker-entrypoint-initdb.d/00_db_init.sql -e TZ=America/Chicago -e MYSQL_ALLOW_EMPTY_PASSWORD=no -e MYSQL_ROOT_PASSWORD=rooot -e MYSQL_DATABASE=rctrials -e MYSQL_USER=rctrialsdbuser -e MYSQL_PASSWORD=rctrialsdbpassword -p 3306:3306 -d mariadb:10.5
+```
+Note the mapping of the `db_init.sql` file is different depending on the host environment.
+
+Running `docker ps` should now display the running `rctrials_db` container. To validate the initialization you can run:
+```
+> docker exec -it rctrials_db /bin/bash
+```
+Running any of the following should produce errors:
+```
+> mysql
+> mysql -uroot
+> mysql -uroot -pabc
+```
+Running the following should give you access to the initialized database:
+```
+> mysql -urctrialsdbuser -prctrialsdbpassword rctrials
+```
+Running the following should show you the initialized table structure:
+```
+> show tables
+```
+
+###### app
+
+Execute the following command to build the `app` service:
+```
+> docker build -t rctrials_app:dev ./src/
+```
+
+Execute the following command to run the `app` service:
+_Linux:_
+```
+> docker run --name=rctrials_app -p 80:80 -p 443:443 --link rctrials_db:db -d rctrials_app:dev
+```
+_Windows:_
+```
+> docker run --name=rctrials_app -p 80:80 -p 443:443 --link rctrials_db:db -d rctrials_app:dev
+```
+
+Running `docker ps` should now display the running `rctrials_app` container. To validate the initialization you can run:
+```
+> docker exec -it rctrials_app /bin/bash
+```
+Running the following will validate the connection to the database:
+```
+> apt-get install -y iputils-ping
+> ping db
+```
+
+## Deploying to Cloud
+
+#### Create Persistent DB Storage
+Create a `persistent-db` disk in the `us-central1` region.  
+
+#### Instantiate a DB Image
+Create an `f1-micro` instance in the `us-central1` region to stay on the Free Tier.  
+Use the `mariadb:10.5` container image.  
+Under `Advanced container options` set all the necessary environment variables to match the `docker-compose.yml` file.  
+Add a `Volume mount` to mount `/db` to host's `/mnt/disks/persistent`.  
+Do not allow HTTP(S) traffic.  
+Under `Disks` add the `persistent-db` as an additional disk and hit `Done`.
+Under `Networking` set the hostname as `db.rctrials.internal`.
+
+#### Format Persistent Storage (first time only)
+To use the persistent storage, it must first be formatted.
+```
+> sudo lsblk
+> sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/[DEVICE_ID]
+> sudo mkdir -p /mnt/disks/[MNT_DIR]
+> sudo mount -o discard,defaults /dev/[DEVICE_ID] /mnt/disks/[MNT_DIR]
+> sudo chmod a+w /mnt/disks/[MNT_DIR]
+```
+e.g.
+```
+> sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/sdb && sudo mkdir -p /mnt/disks/persistent && sudo mount -o discard,defaults /dev/sdb /mnt/disks/persistent && sudo chmod a+w /mnt/disks/persistent
+```
+
+#### Load Data From Persistent Storage
+Inside the host machine mount the persistent volume and restart the docker container:
+```
+> sudo mount -o discard,defaults /dev/[DEVICE_ID] /mnt/disks/[MNT_DIR]
+> docker restart $(docker ps -f name=db -q)
+```
+e.g.
+```
+> sudo mount -o discard,defaults /dev/sdb /mnt/disks/persistent
+> docker restart $(docker ps -f name=db -q)
+```
+Now the docker container has access to the persistent disk with SQL initialization and backup files.
+
+To initialize the db:
+```
+> docker exec -it $(docker ps -f name=db -q) /bin/bash
+> mysql -urctrialsdbuser -prctrialsdbpassword rctrials < /db/00_db_init.sql
+```
 
 
-#### Sanity check:
-Visit https://localhost/api/  
+#### Build and Tag Container Image
+Execute the following commands to build and tag the `app` service container:
+```
+> docker build -t gcr.io/rctrials/app:0.1 -t gcr.io/rctrials/app:latest ./src/
+```
+
+Push the container to registry:
+```
+> docker push gcr.io/rctrials/app:latest
+> docker push gcr.io/rctrials/app:0.1
+```
+
+Create an `f1-micro` instance in the `us-central1` region to stay on the Free Tier.  
+Use the `gcr.io/rctrials/app:latest` container image.
+Allow HTTP and HTTPS traffic.
+
+
+#### Link Container to Database
+Connect to the instance and get inside the docker container:
+```
+> docker exec -it $(docker ps -f name=app -q) /bin/bash
+```
+Install vim:
+```
+> apt-get update
+> apt-get install vim iputils-ping
+```
+Edit hosts to connect to the db instance:
+```
+> vim /etc/hosts
+```
+add a line similar to:
+```
+[IP_OF_DB_INSTANCE]  db
+```
+test connection:
+```
+> ping db
+```
+
+
+#### Install LetsEncrypt
+Connect to instance and enter the container:
+```
+
+```
+Then execute the following:
+```
+> apt-get update
+> apt-get install git
+> cd /
+> mkdir letsencrypt
+> git clone https://github.com/letsencrypt/letsencrypt
+> cd /letsencrypt
+> ./letsencrypt-auto -d rctrials.interfacemaster.ca certonly
+...
+> service apache2 restart
+```
