@@ -1,2 +1,3 @@
+db/mariadb
 src/vendor
 vagrant/.vagrant

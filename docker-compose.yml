@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+
+  app:
+    build:
+      context: ./src
+    ports:
+      - 80:80
+      - 443:443
+    # DEV:
+    # volumes:
+    #    - ./src:/var/www/html
+    links:
+      - 'db'
+
+  db:
+    image: mariadb:10.5
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db/db_init.sql:/docker-entrypoint-initdb.d/00_db_init.sql
+      # - ./db/mariadb:/var/lib/mysql
+    environment:
+      TZ: "America/Chicago"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      MYSQL_ROOT_PASSWORD: "rooot"
+      MYSQL_DATABASE: 'rctrials'
+      MYSQL_USER: 'rctrialsdbuser'
+      MYSQL_PASSWORD: 'rctrialsdbpassword'

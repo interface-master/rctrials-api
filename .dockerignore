@@ -1,0 +1,8 @@
+.git
+.vagrant
+
+db/db_sample_A.sql
+db/queries.sql
+
+keys
+src/test
