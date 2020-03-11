@@ -1,5 +1,5 @@
 {
-	  "host": "localhost",
+	  "host": "db.rctrials.internal",
 	  "port": "3306",
 	"dbname": "rctrials",
 	  "user": "rctrialsdbuser",
