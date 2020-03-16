@@ -12,9 +12,9 @@ services:
     # volumes:
     #    - ./src:/var/www/html
     links:
-      - 'db'
+      - 'db.internal'
 
-  db:
+  db.internal:
     image: mariadb:10.5
     ports:
       - 3306:3306
