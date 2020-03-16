@@ -16,8 +16,8 @@ fi
 #######################################
 # Add additional repositories
 
-sudo echo "deb http://packages.dotdeb.org jessie all" >> /etc/apt/sources.list
-sudo echo "deb-src http://packages.dotdeb.org jessie all" >> /etc/apt/sources.list
+sudo echo "deb http://packages.dotdeb.org stretch all" >> /etc/apt/sources.list
+sudo echo "deb-src http://packages.dotdeb.org stretch all" >> /etc/apt/sources.list
 sudo apt-get update && sudo apt-get upgrade
 
 #######################################
@@ -35,12 +35,12 @@ sudo apt-get -y --force-yes install git unzip php7.0 mysql-server php7.0-mysql a
 # Replace config files
 
 # Apache Config
-sudo cp /vagrant/configs/apache2/apache2.conf /etc/apache2/apache2.conf
+sudo cp /configs/apache2/apache2.conf /etc/apache2/apache2.conf
 # Sites
-sudo cp /vagrant/configs/apache2/000-default.conf /etc/apache2/sites-available/000-default.conf
-sudo cp /vagrant/configs/apache2/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf
+sudo cp /configs/apache2/000-default.conf /etc/apache2/sites-available/000-default.conf
+sudo cp /configs/apache2/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf
 # PHP
-sudo cp /vagrant/configs/php/php.ini /etc/php/7.0/apache2/php.ini
+sudo cp /configs/php/php.ini /etc/php/7.0/apache2/php.ini
 
 #######################################
 # Set up log files
@@ -84,12 +84,13 @@ openssl x509 -req -days 365 -in rctrials.csr -signkey rctrials.key -out rctrials
 sudo chmod 600 rctrials.*
 sudo chown www-data:www-data rctrials.*
 
-# The following lines can be used to directly replace the certificates
-# at the default apache locations. However, if custom .config files are used
-# then the locations of the .crt and .key files are specified.
-#
-# sudo cp rctrials.crt /etc/ssl/certs/ssl-cert-snakeoil.pem
-# sudo cp rctrials.key /etc/ssl/private/ssl-cert-snakeoil.key
+
+#######################################
+# Certbot
+#######################################
+
+sudo apt-get -y install certbot python-certbot-apache
+
 
 #######################################
 # Set up Date/Time
