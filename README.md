@@ -4,12 +4,44 @@ Back End API for the RCTrials Platform
 
 # Setup
 
+The host machine should have access to BASH, PHP, and Composer. These tools are used to run pre-deployment scripts to download the source dependencies.
+
+If on Windows, install the Ubuntu subsystem, execute `bash` then run:
+```
+> sudo apt install composer zip
+```
+Remove any caches:
+```
+> sudo rm -rf ~/.composer/
+```
+Remount the C: drive with correct permissions:
+(make sure no other shell is connected to the mounted `/mnt/c` volume)
+```
+> cd /
+> umount /mnt/c
+> mount -t drvfs -o metadata C: /mnt/c
+```
+Finally, run Composer to install PHP dependencies:
+```
+> cd src
+> composer update
+```
+
 ## Working Locally
 
 #### Launching Entire LAMP Stack
 Execute the following command to launch the `app` and `db` services:
 ```
 > docker-compose up
+```
+
+If you wish to develop over HTTPS, you will need to point the self-signed files to the default locations. Connect to the app container:
+```
+> docker exec -it $(docker ps -f name=app -q) /bin/bash
+```
+And set the location of the certificate files in the apache ssl config to the self-signed ones generated during the build process:
+```
+> sed -i 's/\/etc\/ssl\/certs\/ssl-cert-snakeoil.pem/\/ssl\/rctrials.crt/g' /etc/apache2/sites-available/default-ssl.conf && sed -i 's/\/etc\/ssl\/private\/ssl-cert-snakeoil.key/\/ssl\/rctrials.key/g' /etc/apache2/sites-available/default-ssl.conf
 ```
 
 #### Launching Each Container Individually
@@ -85,9 +117,9 @@ Create an `f1-micro` instance in the `us-central1` region to stay on the Free Ti
 Use the `mariadb:10.5` container image.  
 Under `Advanced container options` set all the necessary environment variables to match the `docker-compose.yml` file.  
 Add a `Volume mount` to mount `/db` to host's `/mnt/disks/persistent`.  
-Do not allow HTTP(S) traffic.  
-Under `Disks` add the `persistent-db` as an additional disk and hit `Done`.
-Under `Networking` set the hostname as `db.rctrials.internal`.
+Do not allow HTTP or HTTPS traffic. ~and remove the external IP (the machine will only be accessed by the app server from an internal network). [for some reason, removing external ip causes docker images not to load or run - should investigate]~  
+Under `Disks` add the `persistent-db` as an additional disk, set to read-write mode and hit `Done`.
+Under `Networking` set the hostname as `db.internal`.
 
 #### Format Persistent Storage (first time only)
 To use the persistent storage, it must first be formatted.
@@ -145,39 +177,57 @@ Connect to the instance and get inside the docker container:
 ```
 > docker exec -it $(docker ps -f name=app -q) /bin/bash
 ```
-Install vim:
+You will need to add a line to `/etc/hosts` similar to:
 ```
-> apt-get update
-> apt-get install vim iputils-ping
+[IP_OF_DB_INSTANCE]  db.internal
 ```
-Edit hosts to connect to the db instance:
+where the IP is the `internal IP` of the db instance.
+You can do it minimally with:
 ```
+> echo "[IP_OF_DB_INSTANCE]  db.internal" >> /etc/hosts
+```
+or
+```
+> cp /etc/hosts /etc/hosts.bak
+> sed 's/old-ip/new-ip/g' /etc/hosts.bak > /etc/hosts
+```
+or by installing `vim` with:
+```
+> apt-get update && apt-get install vim
 > vim /etc/hosts
 ```
-add a line similar to:
+
+Then test the connection:
 ```
-[IP_OF_DB_INSTANCE]  db
-```
-test connection:
-```
-> ping db
+> apt-get update && apt-get install iputils-ping
+> ping db.internal
 ```
 
 
 #### Install LetsEncrypt
-Connect to instance and enter the container:
+Connect to app instance and enter the container:
 ```
-
+> docker exec -it $(docker ps -f name=app -q) /bin/bash
 ```
 Then execute the following:
 ```
-> apt-get update
-> apt-get install git
-> cd /
-> mkdir letsencrypt
-> git clone https://github.com/letsencrypt/letsencrypt
-> cd /letsencrypt
-> ./letsencrypt-auto -d rctrials.interfacemaster.ca certonly
+> certbot --apache
+  - interface.master@gmail.com
+  - A
+  - N
+  - rctrials.interfacemaster.ca
+  - 2
+????> ./letsencrypt-auto -d rctrials.interfacemaster.ca certonly
 ...
 > service apache2 restart
 ```
+
+
+#### Check Site
+Navigate to the site online to validate everything is working:
+https://rctrials.interfacemaster.ca/api
+
+Should show "Method Not Allowed".
+
+Check for SSL issues by navigating to http.
+Check for DB issues by pinging db.internal from app instance.
