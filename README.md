@@ -97,6 +97,15 @@ _Windows:_
 > docker run --name=rctrials_app -p 80:80 -p 443:443 --link rctrials_db:db -d rctrials_app:dev
 ```
 
+OR
+to attach an app to an existing db container initiated by `docker-compose` you will need to specify the network:
+```
+> docker network ls
+> docker run --name=rctrials_app -p 8081:80 -p 8444:443 --link rctrials_db.internal.research_1 --net rctrials_default -v C:\RCTrials\src:/var/www/html -d rctrials_app:latest
+> docker run --name=mehailo_app -p 8082:80 -p 8445:443 --link mehailo_db.internal.app_1 --net mehailo_default -v C:\MEHAILO\Source\AppServer\:/var/www/html -d mehailo_app:latest
+```
+
+
 Running `docker ps` should now display the running `rctrials_app` container. To validate the initialization you can run:
 ```
 > docker exec -it rctrials_app /bin/bash
