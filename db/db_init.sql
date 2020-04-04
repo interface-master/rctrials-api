@@ -98,7 +98,7 @@ CREATE TABLE `groups` (
   `gid` SMALLINT NOT NULL,
   `name` VARCHAR(20) NOT NULL,
   `size` ENUM('auto','manual') NOT NULL DEFAULT 'auto',
-  `size_n` SMALLINT,
+  `size_n` SMALLINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`tid`,`gid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
