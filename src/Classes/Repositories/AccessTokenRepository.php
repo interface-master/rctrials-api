@@ -23,12 +23,12 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface {
 
 		// get the token and necessary info
 		$privateKey = new CryptKey( 'file://' . __DIR__ . '/../../../../../ssl/rctrials.key' );
-		$tokenJWT = $accessTokenEntity->convertToJWT( $privateKey );
+		$tokenJWT = $accessTokenEntity->__toString();
 
 		$obj = new \stdClass();
 		$obj->uid = $accessTokenEntity->getUserIdentifier(); //$tokenJWT->getClaim('sub', false); // this is the token subscriber: user id
 		$obj->tid = $accessTokenEntity->getIdentifier(); // token identifier
-		$obj->access_token = $tokenJWT->__toString(); // this is the token that's sent back to the user
+		$obj->access_token = $tokenJWT; // this is the token that's sent back to the user
 		$obj->date_expires = $accessTokenEntity->getExpiryDateTime()->format("Y-m-d H:i:s"); // this is when the token expires
 
 		$output = $db->saveToken( $obj );
