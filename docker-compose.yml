@@ -6,18 +6,19 @@ services:
     build:
       context: ./src
     ports:
-      - 80:80
-      - 443:443
+      - 8081:80
+      - 8444:443
     # DEV:
-    # volumes:
-    #    - ./src:/var/www/html
+    volumes:
+       - ./src:/var/www/html
+    # /DEV
     links:
-      - 'db.internal'
+      - 'db.internal.research'
 
-  db.internal:
+  db.internal.research:
     image: mariadb:10.5
     ports:
-      - 3306:3306
+      - 3307:3306
     volumes:
       - ./db/db_init.sql:/docker-entrypoint-initdb.d/00_db_init.sql
       # - ./db/mariadb:/var/lib/mysql
