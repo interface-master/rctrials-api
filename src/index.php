@@ -419,7 +419,7 @@ $app->get( API_ROOT.'/trial/{tid}',
 		$tid = $args['tid'];
 		$output = $this->db->getTrialDetails( $user->uid, $tid );
 		$response = $response->withHeader( 'Content-type', 'application/json' );
-		if( sizeof($output) > 0 ) {
+		if( $output !== new \stdClass() ) {
 			$response = $response->withJson( $output );
 		} else {
 			$response = $response->withStatus(204);
