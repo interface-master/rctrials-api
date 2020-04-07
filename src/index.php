@@ -2,8 +2,10 @@
 
 require './vendor/autoload.php';
 
-use \Psr\Http\Message\ServerRequestInterface as Request;
-use \Psr\Http\Message\ResponseInterface as Response;
+use DI\Container;
+
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\CryptKey;
@@ -11,8 +13,10 @@ use League\OAuth2\Server\ResourceServer;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Grant\PasswordGrant;
 use League\OAuth2\Server\Grant\RefreshTokenGrant;
-use League\OAuth2\Server\Middleware\AuthorizationServerMiddleware;
-use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
+use League\OAuth2\Server\Middleware\Psr15AuthorizationServerMiddleware as AuthorizationServerMiddleware;
+use League\OAuth2\Server\Middleware\Psr15ResourceServerMiddleware as ResourceServerMiddleware;
+
+use Slim\Factory\AppFactory;
 
 use RCTrials\Repositories\ClientRepository;
 use RCTrials\Repositories\AccessTokenRepository;
@@ -31,6 +35,7 @@ if( !isset($_SERVER['HTTP_AUTHORIZATION']) && isset($_SERVER["REDIRECT_HTTP_AUTH
 }
 // /weird thing
 
+/*
 $app = new \Slim\App([
 	'settings' => [
 		'displayErrorDetails' => true, // TODO: remove this for production
@@ -88,14 +93,81 @@ $app = new \Slim\App([
 		return new ResourceServerMiddleware( $server );
 	}
 ]);
+*/
 
-// get container
+// container using PHP-DI
+$container = new Container();
+$accessTokenRepo = new AccessTokenRepository();
+$clientRepo = new ClientRepository();
+$scopeRepo = new ScopeRepository();
+$refreshTokenRepo = new RefreshTokenRepository();
+$privateKeyPath = PATH_RSA_KEYS.'rctrials.key';
+$publicKeyPath = PATH_RSA_KEYS.'rctrials.crt';
+$resourceServer = new ResourceServer( $accessTokenRepo, $publicKeyPath );
+$resourceServerMiddleware = new ResourceServerMiddleware( $resourceServer );
+
+$container->set(AuthorizationServer::class, function () {
+  // Setup the authorization server
+  $server = new AuthorizationServer(
+    $clientRepo,      // instance of ClientRepositoryInterface
+    $accessTokenRepo, // instance of AccessTokenRepositoryInterface
+    $scopeRepo,       // instance of ScopeRepositoryInterface
+    $privateKeyPath,  // path to private key
+    $publicKeyPath    // path to public key
+  );
+
+  // password grant
+  $grant_pass = new PasswordGrant(
+    new UserRepository(),  // instance of UserRepositoryInterface
+    $refreshTokenRepo      // instance of RefreshTokenRepositoryInterface
+  );
+  $grant_pass->setRefreshTokenTTL(new \DateInterval('P1M')); // refresh tokens will expire after 1 month
+  // Enable the password grant on the server with a token TTL of 1 hour
+  $server->enableGrantType(
+    $grant_pass,
+    new \DateInterval('PT1H') // access tokens will expire after 1 hour
+  );
+
+  // refresh grant
+  $grant_refresh = new RefreshTokenGrant( $refreshTokenRepo );
+  $grant_refresh->setRefreshTokenTTL(new \DateInterval('P1M'));
+  $server->enableGrantType(
+    $grant_refresh,
+    new \DateInterval('PT1H')
+  );
+  $server->grant_refresh = $grant_refresh;
+
+  return $server;
+});
+$container->set(ResourceServer::class, function () {
+  return $resourceServer;
+});
+$container->set(ResourceServerMiddleware::class, function () {
+  return $resourceServerMiddleware;
+});
+
+// instantiate app
+AppFactory::setContainer($container);
+$app = AppFactory::create();
+$app->addRoutingMiddleware();
+
+// add container
 $container = $app->getContainer();
 // set up us the database
-$container['db'] = DatabaseManager::getInstance();
+$container->set('db', function(\Psr\Container\ContainerInterface $container) {
+  return DatabaseManager::getInstance();
+});
+
+// error handling
+$displayErrorDetails = true;
+$logErrors = true;
+$logErrorDetails = true;
+$errorMiddleware = $app->addErrorMiddleware( $displayErrorDetails, $logErrors, $logErrorDetails );
+
 
 
 // CORS
+/*
 $app->options('/{routes:.+}', function ($request, $response, $args) {
 	return $response;
 });
@@ -107,6 +179,7 @@ $app->add(function ($req, $res, $next) {
 		->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
 		->withHeader('Access-Control-Max-Age', '600');
 });
+*/
 
 // ADMIN REGISTRATION
 /**
@@ -141,24 +214,24 @@ $app->add(function ($req, $res, $next) {
  */
 $app->post( API_ROOT.'/register',
 	function( Request $request, Response $response ) use ( $app ) {
+    $params = $request->getParsedBody();
 		$obj = new \stdClass();
 		$salt = bin2hex(openssl_random_pseudo_bytes(16));
-		$obj->email = $request->getParam('email');
-		$obj->pass = $request->getParam('pass'); // TODO: DO NOT SAVE THIS
-		$obj->name = $request->getParam('name');
+		$obj->email = $params['email'];
+		$obj->pass = $params['pass']; // TODO: DO NOT SAVE THIS
+		$obj->name = $params['name'];
 		$obj->role = 'admin';
 		$obj->salt = $salt;
-		$obj->hash = password_hash( $salt.$request->getParam('pass'), PASSWORD_BCRYPT );
+		$obj->hash = password_hash( $salt.$params['pass'], PASSWORD_BCRYPT );
 		// check if email exists
-		$output = $this->db->newAdmin( $obj );
+		$output = $app->getContainer()->get('db')->newAdmin( $obj );
 		// output
 		if( isset($output->error) && strlen($output->error) > 0 ) {
 			$response = $response->withStatus( $output->status );
 		}
 		unset( $output->status );
-		$response = $response->withHeader( 'Content-type', 'application/json' );
-		$response = $response->withJson( $output );
-		return $response;
+    $response->getBody()->write( json_encode($output) );
+    return $response->withHeader( 'Content-type', 'application/json' );
 	}
 );
 
@@ -296,10 +369,10 @@ $app->post( API_ROOT.'/validate/login',
  *
  */
 $app->get( API_ROOT.'/user/details',
-	function( Request $request, Response $response ) use ( $app ) {
+	function( Request $request, Response $response, $args ) use ( $app ) {
 		// $uid = $this->db->getUserFromAuth( $request->getHeader('authorization') );
 		$output = new \stdClass();
-		$user = $this->db->getUserByAuth( $request->getAttribute('oauth_access_token_id') );
+		$user = $app->getContainer()->get('db')->getUserByAuth( $request->getAttribute('oauth_access_token_id') );
 		if( $user !== false ) {
 			$output = array(
 				'uid' => $user->uid,
@@ -308,11 +381,10 @@ $app->get( API_ROOT.'/user/details',
 				'role' => $user->role
 			);
 		}
-		$response = $response->withHeader( 'Content-type', 'application/json' );
-		$response = $response->withJson( $output );
-		return $response;
+    $response->getBody()->write( json_encode($output) );
+    return $response->withHeader( 'Content-type', 'application/json' );
 	}
-)->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
+)->add( $resourceServerMiddleware );
 
 // ADMIN LIST TRIALS
 /**
@@ -355,7 +427,7 @@ $app->get( API_ROOT.'/user/trials',
 		$response = $response->withJson( $output );
 		return $response;
 	}
-)->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
+)->add( $resourceServerMiddleware );
 
 // ADMIN TRIAL DETAILS
 /**
@@ -426,7 +498,7 @@ $app->get( API_ROOT.'/trial/{tid}',
 		}
 		return $response;
 	}
-)->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
+)->add( $resourceServerMiddleware );
 
 // ADMIN NEW TRIAL
 /**
@@ -514,7 +586,7 @@ $app->post( API_ROOT.'/new/trial',
 		$response = $response->withJson( $output );
 		return $response;
 	}
-)->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
+)->add( $resourceServerMiddleware );
 
 
 // VALIDATE TRIAL
@@ -538,11 +610,10 @@ $app->get( API_ROOT.'/validate/trial/{tid}',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
 		$tid = $args['tid'];
-		$output = $this->db->validateTrial( $tid );
+		$output = $app->getContainer()->get('db')->validateTrial( $tid );
 		$output->found = intval($output->found);
-		$response = $response->withHeader( 'Content-type', 'application/json' );
-		$response = $response->withJson( $output );
-		return $response;
+		$response->getBody()->write( json_encode($output) );
+    return $response->withHeader( 'Content-type', 'application/json' );
 	}
 );
 
@@ -682,6 +753,6 @@ $app->get('/hello/{name}', function (Request $request, Response $response, array
 
 	$response->getBody()->write("Hello, $name");
 	return $response;
-})->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
+})->add( $resourceServerMiddleware );
 
 $app->run();
