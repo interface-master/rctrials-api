@@ -108,6 +108,17 @@ $app->add(function ($req, $res, $next) {
 		->withHeader('Access-Control-Max-Age', '600');
 });
 
+// ROOT
+$app->get( '/',
+  function( Request $request, Response $response ) use ( $app ) {
+    $obj = new \stdClass();
+    $obj->status = "ok";
+    $response = $response->withHeader( 'Content-type', 'application/json' );
+    $response = $response->withJson( $obj );
+    return $response;
+  }
+);
+
 // ADMIN REGISTRATION
 /**
  * @api {post} /api/register New User
