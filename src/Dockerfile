@@ -22,3 +22,6 @@ RUN a2enmod ssl \
 
 # copy source
 COPY . /var/www/html
+COPY ./conn /var/conn
+
+CMD ["apache2-foreground"]
