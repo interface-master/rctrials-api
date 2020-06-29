@@ -1,6 +1,6 @@
 # RCTrials-API
 Back End API for the RCTrials Platform
-`v0.1.1`
+`v0.2.0`
 
 # Setup
 
