@@ -13,7 +13,7 @@ class DatabaseManager {
 
 	public static function getInstance() {
 		if (!isset(static::$instance)) {
-			$dbConnInfo = file_get_contents( __DIR__ . "/dbconn.json");
+			$dbConnInfo = file_get_contents( __DIR__ . "/../../../conn/dbconn.json");
 			$obj = json_decode($dbConnInfo, true);
 			$host = $obj['host'];
 			$port = $obj['port'];

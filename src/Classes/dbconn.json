@@ -1,7 +1,0 @@
-{
-	  "host": "db.internal.research",
-	  "port": "3306",
-	"dbname": "rctrials",
-	  "user": "rctrialsdbuser",
-	  "pass": "rctrialsdbpassword"
-}
