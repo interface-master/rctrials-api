@@ -22,6 +22,8 @@ use RCTrials\Repositories\RefreshTokenRepository;
 
 use RCTrials\DatabaseManager;
 
+require './version.php';
+
 DEFINE( 'PATH_RSA_KEYS', 'file://'.__DIR__.'/../../../ssl/' );
 DEFINE( 'API_ROOT', '/api' );
 
@@ -113,6 +115,10 @@ $app->get( '/',
   function( Request $request, Response $response ) use ( $app ) {
     $obj = new \stdClass();
     $obj->status = "ok";
+    if( $container['db'] != null ) {
+      $obj->status = "connected";
+    }
+    $obj->version = VERSION;
     $response = $response->withHeader( 'Content-type', 'application/json' );
     $response = $response->withJson( $obj );
     return $response;
