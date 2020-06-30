@@ -5,9 +5,9 @@ MAINTAINER interface.master@gmail.com
 
 # install pdo and mysql
 RUN apt-get update \
-    && apt-get install -y \
-    certbot \
-    python-certbot-apache \
+  #  && apt-get install -y \
+  #  certbot \
+  #  python-certbot-apache \
     && docker-php-ext-install \
     pdo \
     pdo_mysql
