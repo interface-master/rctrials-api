@@ -13,17 +13,25 @@ class DatabaseManager {
 
 	public static function getInstance() {
 		if (!isset(static::$instance)) {
-			$dbConnInfo = file_get_contents( __DIR__ . "/../../../conn/dbconn.json");
-			$obj = json_decode($dbConnInfo, true);
-			$host = $obj['host'];
-			$port = $obj['port'];
-			$dbname = $obj['dbname'];
-			$user = $obj['user'];
-			$pass = $obj['pass'];
-			$conn = "mysql:host=$host;dbname=$dbname;port=$port;charset=utf8mb4;";
-			// instantiate
-			static::$instance = new DatabaseManager();
-			self::$instance->dbh = new \PDO( $conn, $user, $pass );
+      try {
+        $options = [
+          \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+        ];
+        $dbConnInfo = file_get_contents( __DIR__ . "/../../../conn/dbconn.json");
+  			$obj = json_decode($dbConnInfo, true);
+  			$host = $obj['host'];
+  			$port = $obj['port'];
+  			$dbname = $obj['dbname'];
+  			$user = $obj['user'];
+  			$pass = $obj['pass'];
+  			$conn = "mysql:host=$host;dbname=$dbname;port=$port;charset=utf8mb4;";
+  			// instantiate
+  			static::$instance = new DatabaseManager();
+  			self::$instance->dbh = new \PDO( $conn, $user, $pass, $options );
+        // self::$instance->dbh->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+      } catch ( \Exception $err ) {
+        return null;
+      }
 		}
 		return static::$instance;
 	}
