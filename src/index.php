@@ -688,18 +688,5 @@ $app->post( API_ROOT.'/trial/{tid}/survey/{sid}',
 	}
 );
 
-// TESTING
-// TODO: remove this
-$app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
-	$name = $args['name'];
-
-	// $output = $this->db->getCursor();
-
-	// $response = $response->withHeader( 'Content-type', 'application/json' );
-	// $response = $response->withJson( $output );
-
-	$response->getBody()->write("Hello, $name");
-	return $response;
-})->add( new ResourceServerMiddleware($app->getContainer()->get(ResourceServer::class)) );
 
 $app->run();
