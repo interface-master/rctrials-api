@@ -115,7 +115,7 @@ $app->get( '/',
   function( Request $request, Response $response ) use ( $app ) {
     $obj = new \stdClass();
     $obj->status = "ok";
-    if( $container['db'] != null ) {
+    if( $this->db != null ) {
       $obj->status = "connected";
     }
     $obj->version = VERSION;
@@ -594,8 +594,9 @@ $app->post( API_ROOT.'/register/{tid}',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
 		$tid = $args['tid'];
+		$firebase_token = $request->getParam('token');
 		// output
-		$output = $this->db->newSubject( $tid );
+		$output = $this->db->newSubject( $tid, $firebase_token );
 		if( $output->status !== 200 ) {
 			$response = $response->withStatus( $output->status );
 		}

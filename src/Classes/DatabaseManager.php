@@ -83,7 +83,7 @@ class DatabaseManager {
 		return $ret;
 	}
 
-	public function newSubject( $tid ) {
+	public function newSubject( $tid, $firebase_token ) {
 		// return value
 		$ret = new \stdClass();
 		try {
@@ -108,15 +108,18 @@ class DatabaseManager {
 				$this->dbh->exec("SET @UID = UUID();");
 				$stmt = $this->dbh->prepare(
 					"INSERT INTO
-					`subjects` ( id, tid )
+					`subjects` ( id, tid, f6e_token )
 					VALUES
-					( @UID, :tid );"
+					( @UID, :tid, :token );"
 				);
 				$stmt->execute(array(
-					'tid' => $tid
+					'tid' => $tid,
+          'token' => $firebase_token
 				));
 				$stmt = $this->dbh->prepare(
-					"SELECT @UID AS `uid`;"
+					"SELECT `s`.`id` AS `uid`, `s`.`group`
+					   FROM `subjects` AS `s`
+					  WHERE `s`.`id` = @UID;"
 				);
 				$stmt->execute();
 				$subject = $stmt->fetch(\PDO::FETCH_OBJ);
@@ -730,7 +733,7 @@ class DatabaseManager {
 					`u`.`id` = :uid
 				AND `u`.`tid` = :tid
 				GROUP BY
-					`a`.`tid`, `a`.`sid`, `a`.`uid`
+					`s`.`tid`, `s`.`sid`, `a`.`uid`
 			) AS `x`
 			WHERE
 				`x`.`answers` < 1;"
