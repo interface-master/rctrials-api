@@ -165,6 +165,7 @@ class DatabaseManager {
 				}
 				// output
 				$ret->uuid = $subject->uid;
+				$ret->pbl = boolval( $subject->group );
 				$ret->surveys = $surveys;
 				$ret->status = 200;
 			} else {
