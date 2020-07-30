@@ -60,14 +60,14 @@ CREATE TABLE `tokens` (
 -- STORES DETAILS ABOUT TRIAL DATES, USER, TIMEZONE
 DROP TABLE IF EXISTS `trials`;
 CREATE TABLE `trials` (
-  `tid` VARCHAR(4) NOT NULL,
+  `tid` VARCHAR(4) NOT NULL DEFAULT '',
   `uid` VARCHAR(36) NOT NULL,
   `title` VARCHAR(32) NOT NULL,
-  `regopen` DATETIME NOT NULL,
-  `regclose` DATETIME NOT NULL,
-  `trialstart` DATETIME NOT NULL,
-  `trialend` DATETIME NOT NULL,
-  `trialtype` ENUM('simple') NOT NULL,
+  `regopen` DATETIME NOT NULL DEFAULT '1970-01-01 00:00:01',
+  `regclose` DATETIME NOT NULL DEFAULT '3000-01-01 00:00:01',
+  `trialstart` DATETIME NOT NULL DEFAULT '1970-01-01 00:00:01',
+  `trialend` DATETIME NOT NULL DEFAULT '3000-01-01 00:00:01',
+  `trialtype` ENUM('simple') NOT NULL DEFAULT 'simple',
   `timezone` VARCHAR(32),
   `created` TIMESTAMP DEFAULT '1970-01-01 00:00:01',
   `updated` TIMESTAMP DEFAULT '1970-01-01 00:00:01' ON UPDATE CURRENT_TIMESTAMP,
@@ -81,13 +81,15 @@ CREATE TRIGGER `trials_before_insert` BEFORE INSERT ON `trials`
 FOR EACH ROW BEGIN
   DECLARE ready INT DEFAULT 0;
   DECLARE rnd_str TEXT;
-  WHILE NOT READY DO
-    SET rnd_str := LEFT( UUID(), 4 );
-    IF NOT EXISTS (SELECT * FROM `trials` WHERE `tid` = rnd_str) THEN
-      SET new.tid = rnd_str;
-      SET ready := 1;
-    END IF;
-  END WHILE;
+  IF (new.tid IS NULL OR new.tid = '') THEN
+    WHILE NOT READY DO
+      SET rnd_str := LEFT( UUID(), 4 );
+      IF NOT EXISTS (SELECT * FROM `trials` WHERE `tid` = rnd_str) THEN
+        SET new.tid = rnd_str;
+        SET ready := 1;
+      END IF;
+    END WHILE;
+  END IF;
 END;//
 DELIMITER ;
 
