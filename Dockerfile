@@ -21,7 +21,7 @@ RUN a2enmod ssl \
   && a2enmod rewrite
 
 # copy source
-COPY . /var/www/html
-COPY ./conn /var/conn
+COPY ./src /var/www/html
+COPY ./configs/conn /var/conn
 
 CMD ["apache2-foreground"]

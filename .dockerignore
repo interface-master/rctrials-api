@@ -1,8 +1,14 @@
 .git
 .vagrant
 
-db/db_sample_A.sql
-db/queries.sql
+configs/apache2
+configs/php
+configs/conn/mehailo-20200620-7ce45a69fcdd.json
+
+db
 
 keys
+
 src/test
+src/build.sh
+src/info.php
