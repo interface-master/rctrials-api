@@ -687,7 +687,7 @@ class DatabaseManager {
 		$stmt = $this->dbh->prepare(
 			"SELECT * FROM (
 				SELECT
-					`s`.`tid`, `s`.`sid`, `s`.`name`,
+					`s`.`tid`, `s`.`sid`, `s`.`name`, `s`.`intro`,
 					`s`.`pre`, `s`.`post`, `s`.`during`, `s`.`interval`, `s`.`frequency`,
 					COUNT(`a`.`uid`) AS `answers`
 				FROM
@@ -770,6 +770,7 @@ class DatabaseManager {
 			$survey->during = intval($survey->during);
 			$survey->interval = intval($survey->interval);
 			$survey->answers = intval($survey->answers);
+			$survey->intro = $survey->intro;
 			foreach ($survey->questions as $question) {
 				$question->qid = intval($question->qid);
 			}

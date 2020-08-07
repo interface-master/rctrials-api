@@ -41,7 +41,7 @@ UNLOCK TABLES;
 --
 
 LOCK TABLES `surveys` WRITE;
-INSERT INTO `surveys` VALUES ('6fdc',0,'Demographics','[0,1]',1,0,0,1,'days'),('6fdc',1,'PHQ-4','[0,1]',0,1,0,7,'days');
+INSERT INTO `surveys` VALUES ('6fdc',0,'Demographics','intro a','[0,1]',1,0,0,1,'days'),('6fdc',1,'PHQ-4','Over the last 2 weeks, how often have you been bothered by any of the following problems?','[0,1]',0,1,0,7,'days');
 UNLOCK TABLES;
 
 --
