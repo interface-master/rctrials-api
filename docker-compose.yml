@@ -3,6 +3,7 @@ version: '3.3'
 services:
 
   app:
+    image: gcr.io/randomized-controlled-trials/app:latest
     build:
       context: .
     ports:
@@ -24,9 +25,9 @@ services:
       - ./db/db_sample_6fdc.sql:/docker-entrypoint-initdb.d/10_db_populate.sql
       # - ./db/mariadb:/var/lib/mysql
     environment:
-      TZ: "America/Chicago"
-      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
-      MYSQL_ROOT_PASSWORD: "rooot"
+      TZ: 'America/Chicago'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'no'
+      MYSQL_ROOT_PASSWORD: 'rooot'
       MYSQL_DATABASE: 'rctrials'
       MYSQL_USER: 'rctrials-db-user'
       MYSQL_PASSWORD: 'rctrials-db-pass'
