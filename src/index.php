@@ -25,7 +25,7 @@ use RCTrials\DatabaseManager;
 require './version.php';
 
 DEFINE( 'PATH_RSA_KEYS', 'file://'.__DIR__.'/../../../ssl/' );
-DEFINE( 'API_ROOT', '/api' );
+DEFINE( 'API_ROOT', '/api/rct' );
 
 // weird thing on 1&1 hosting
 if( !isset($_SERVER['HTTP_AUTHORIZATION']) && isset($_SERVER["REDIRECT_HTTP_AUTHORIZATION"]) ) {
