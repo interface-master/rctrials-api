@@ -111,18 +111,20 @@ $app->add(function ($req, $res, $next) {
 });
 
 // ROOT
-$app->get( '/',
-  function( Request $request, Response $response ) use ( $app ) {
-    $obj = new \stdClass();
-    $obj->status = "ok";
-    if( $this->db != null ) {
-      $obj->status = "connected";
-    }
-    $obj->version = VERSION;
-    $response = $response->withHeader( 'Content-type', 'application/json' );
-    $response = $response->withJson( $obj );
-    return $response;
-  }
+$app->get( API_ROOT,
+	function( Request $request, Response $response ) use ( $app ) {
+		$obj = new \stdClass();
+		$obj->hello = "RCTRIALS";
+		if( $this->db != null ) {
+			$obj->status = "ok";
+		} else {
+			$obj->status = "nodb";
+		}
+		$obj->version = VERSION;
+		$response = $response->withHeader( 'Content-type', 'application/json' );
+		$response = $response->withJson( $obj );
+		return $response;
+	}
 );
 
 // ADMIN REGISTRATION
