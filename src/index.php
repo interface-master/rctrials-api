@@ -557,8 +557,12 @@ $app->get( API_ROOT.'/validate/trial/{tid}',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
 		$tid = $args['tid'];
-		$output = $this->db->validateTrial( $tid );
-		$output->found = intval($output->found);
+		if( $this->db != null ) {
+			$output = $this->db->validateTrial( $tid );
+			$output->found = intval($output->found);
+		} else {
+			$output = array('error'=>'nodb');
+		}
 		$response = $response->withHeader( 'Content-type', 'application/json' );
 		$response = $response->withJson( $output );
 		return $response;
@@ -683,7 +687,7 @@ $app->post( API_ROOT.'/trial/{tid}/survey/{sid}',
 		$answers = $request->getParam('answers');
 		// output
 		$output->success = $this->db->saveSurveyAnswers( $uid, $tid, $sid, $answers );
-		$output->answers = $answers;
+		// $output->answers = $answers;
 		$response = $response->withHeader( 'Content-type', 'application/json' );
 		$response = $response->withJson( $output );
 		return $response;
