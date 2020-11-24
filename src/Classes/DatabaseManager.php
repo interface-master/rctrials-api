@@ -775,7 +775,9 @@ class DatabaseManager {
 				$question->qid = intval($question->qid);
 			}
 		}
-		return $surveys;
+		$ret = new \stdClass();
+		$ret->surveys = $surveys;
+		return $ret;
 	}
 
 	/**
