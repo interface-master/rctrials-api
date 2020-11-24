@@ -1,39 +1,46 @@
 # RCTrials-API
 Back End API for the RCTrials Platform
-`v0.2.7`
+`v2.0.0`
 
 # Setup
 
-The host machine should have access to BASH, PHP, and Composer. These tools are used to run pre-deployment scripts to download the source dependencies.
+The stack is based on Linux, so running from Linux or Mac is easier, however, if running on Windows, then the recommended approach is to use PowerShell.
 
-If on Windows, install the Ubuntu subsystem, execute `bash` then run:
+The host machine should have access to Docker, PHP, and Composer. These tools are used to run pre-deployment scripts to download the source dependencies.
+
+## Windows
+
+Install *Docker* by following the instructions here: https://docs.docker.com/docker-for-windows/install/
+
+Install *PHP* by following the instructions here: https://windows.php.net/download/
+Download the latest x64 Non Thread Safe zip file and place under `C:\php`
+
+Install *Composer* by following the instructions here: https://getcomposer.org/download/
+
+Verify all the CLI tools by opening PowerShell and executing:
 ```
-> sudo apt install composer zip
+php --version
+composer --version
+docker --version
+docker-compose --version
 ```
-Remove any caches:
-```
-> sudo rm -rf ~/.composer/
-```
-Remount the C: drive with correct permissions:
-(make sure no other shell is connected to the mounted `/mnt/c` volume)
-```
-> cd /
-> umount /mnt/c
-> mount -t drvfs -o metadata C: /mnt/c
-```
+You should see version outputs from each command.
+
 Finally, run Composer to install PHP dependencies:
 ```
-> cd src
-> composer update
+composer install -d src
 ```
 
 ## Working Locally
 
 #### Launching Entire LAMP Stack
+
 Execute the following command to launch the `app` and `db` services:
 ```
 > docker-compose up
 ```
+
+__**TODO: Enable HTTPS in local environment**__
 
 If you wish to develop over HTTPS, you will need to point the self-signed files to the default locations. Connect to the app container:
 ```
@@ -44,6 +51,21 @@ And set the location of the certificate files in the apache ssl config to the se
 > sed -i 's/\/etc\/ssl\/certs\/ssl-cert-snakeoil.pem/\/ssl\/rctrials.crt/g' /etc/apache2/sites-available/default-ssl.conf && sed -i 's/\/etc\/ssl\/private\/ssl-cert-snakeoil.key/\/ssl\/rctrials.key/g' /etc/apache2/sites-available/default-ssl.conf
 ```
 
+
+#### Replacing Containers
+
+The `app` container, when launched through `docker-compose` in DEV mode will link the `src` folder directly to the `var/www/html` folder, and allow source updating when edited on the host machine.
+
+(Note: "DEV mode" is leaving the `docker-compose.yml` file as-is in the repo, while "PROD mode" is simply commenting out the `services.app.volumes` property.)
+
+To replace the `db` container launched through `docker-compose` run the following commands:
+```
+docker-compose kill db
+docker-compose rm
+docker-compose up -d --no-deps db
+```
+
+
 #### Launching Each Container Individually
 
 The order of operations is important during this process. The `app` service relies on the `db` service to be running, so the database should be built and launched first.
@@ -53,11 +75,11 @@ The order of operations is important during this process. The `app` service reli
 Execute the following command to run the `db` service:  
 _Linux:_
 ```
-> docker run --name=rctrials_db -v ./db/db_init.sql:/docker-entrypoint-initdb.d/00_db_init.sql -e TZ=America/Chicago -e MYSQL_ALLOW_EMPTY_PASSWORD=no -e MYSQL_ROOT_PASSWORD=rooot -e MYSQL_DATABASE=rctrials -e MYSQL_USER=rctrialsdbuser -e MYSQL_PASSWORD=rctrialsdbpassword -p 3306:3306 -d mariadb:10.5
+> docker run --name=rctrials_db -v ./db/db_init.sql:/docker-entrypoint-initdb.d/00_db_init.sql -v ./db/db_sample_6fdc.sql:/docker-entrypoint-initdb.d/10_db_populate.sql -e TZ=America/Chicago -e MYSQL_ALLOW_EMPTY_PASSWORD=no -e MYSQL_ROOT_PASSWORD=rooot -e MYSQL_DATABASE=rctrials -e MYSQL_USER=rctrials-db-user -e MYSQL_PASSWORD=rctrials-db-pass -p 3307:3306 -d mariadb:10.5
 ```
 _Windows:_
 ```
-> docker run --name=rctrials_db -v C:\RCTrials\db\db_init.sql:/docker-entrypoint-initdb.d/00_db_init.sql -e TZ=America/Chicago -e MYSQL_ALLOW_EMPTY_PASSWORD=no -e MYSQL_ROOT_PASSWORD=rooot -e MYSQL_DATABASE=rctrials -e MYSQL_USER=rctrialsdbuser -e MYSQL_PASSWORD=rctrialsdbpassword -p 3306:3306 -d mariadb:10.5
+> docker run --name=rctrials_db -v C:\RCTrials\db\db_init.sql:/docker-entrypoint-initdb.d/00_db_init.sql -v C:\RCTrials\db\db_sample_6fdc.sql:/docker-entrypoint-initdb.d/10_db_populate.sql -e TZ=America/Chicago -e MYSQL_ALLOW_EMPTY_PASSWORD=no -e MYSQL_ROOT_PASSWORD=rooot -e MYSQL_DATABASE=rctrials -e MYSQL_USER=rctrials-db-user -e MYSQL_PASSWORD=rctrials-db-pass -p 3307:3306 -d mariadb:10.5
 ```
 Note the mapping of the `db_init.sql` file is different depending on the host environment.
 
@@ -73,7 +95,7 @@ Running any of the following should produce errors:
 ```
 Running the following should give you access to the initialized database:
 ```
-> mysql -urctrialsdbuser -prctrialsdbpassword rctrials
+> mysql -urctrials-db-user -prctrials-db-pass rctrials
 ```
 Running the following should show you the initialized table structure:
 ```
@@ -84,7 +106,7 @@ Running the following should show you the initialized table structure:
 
 Execute the following command to build the `app` service:
 ```
-> docker build -t rctrials_app:dev ./src/
+> docker build -t rctrials_app:dev .
 ```
 
 Execute the following command to run the `app` service:
@@ -118,62 +140,24 @@ Running the following will validate the connection to the database:
 
 ## Deploying to Cloud
 
-#### Create Persistent DB Storage
-Create a `persistent-db` disk in the `us-central1` region.  
-
-#### Instantiate a DB Image
-Create an `f1-micro` instance in the `us-central1` region to stay on the Free Tier.  
-Use the `mariadb:10.5` container image.  
-Under `Advanced container options` set all the necessary environment variables to match the `docker-compose.yml` file.  
-Add a `Volume mount` to mount `/db` to host's `/mnt/disks/persistent`.  
-Do not allow HTTP or HTTPS traffic. ~and remove the external IP (the machine will only be accessed by the app server from an internal network). [for some reason, removing external ip causes docker images not to load or run - should investigate]~  
-Under `Disks` add the `persistent-db` as an additional disk, set to read-write mode and hit `Done`.
-Under `Networking` set the hostname as `db.internal`.
-
-#### Format Persistent Storage (first time only)
-To use the persistent storage, it must first be formatted.
-```
-> sudo lsblk
-> sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/[DEVICE_ID]
-> sudo mkdir -p /mnt/disks/[MNT_DIR]
-> sudo mount -o discard,defaults /dev/[DEVICE_ID] /mnt/disks/[MNT_DIR]
-> sudo chmod a+w /mnt/disks/[MNT_DIR]
-```
-e.g.
-```
-> sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/sdb && sudo mkdir -p /mnt/disks/persistent && sudo mount -o discard,defaults /dev/sdb /mnt/disks/persistent && sudo chmod a+w /mnt/disks/persistent
-```
-
-#### Load Data From Persistent Storage
-Inside the host machine mount the persistent volume and restart the docker container:
-```
-> sudo mount -o discard,defaults /dev/[DEVICE_ID] /mnt/disks/[MNT_DIR]
-> docker restart $(docker ps -f name=db -q)
-```
-e.g.
-```
-> sudo mount -o discard,defaults /dev/sdb /mnt/disks/persistent
-> docker restart $(docker ps -f name=db -q)
-```
-Now the docker container has access to the persistent disk with SQL initialization and backup files.
-
-To initialize the db:
-```
-> docker exec -it $(docker ps -f name=db -q) /bin/bash
-> mysql -urctrialsdbuser -prctrialsdbpassword rctrials < /db/00_db_init.sql
-```
+#### Use Cloud SQL
+Create a new Cloud SQL instance.
+Create user.
 
 
 #### Build and Tag Container Image
 Execute the following commands to build and tag the `app` service container:
 ```
-> docker build -t gcr.io/rctrials/app:0.1 -t gcr.io/rctrials/app:latest ./src/
+> cd src
+> composer install
+> cd ..
+> docker build -t gcr.io/randomized-controlled-trials/app:1.0.0 -t gcr.io/randomized-controlled-trials/app:latest .
 ```
 
 Push the container to registry:
 ```
-> docker push gcr.io/rctrials/app:latest
-> docker push gcr.io/rctrials/app:0.1
+> docker push gcr.io/randomized-controlled-trials/app:latest
+> docker push gcr.io/randomized-controlled-trials/app:1.0.0
 ```
 
 Create an `f1-micro` instance in the `us-central1` region to stay on the Free Tier.  
