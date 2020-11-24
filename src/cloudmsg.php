@@ -7,7 +7,7 @@ use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 
 
-$factory = (new Factory)->withServiceAccount( __DIR__.'/conn/mehailo-20200620-7ce45a69fcdd.json' );
+$factory = (new Factory)->withServiceAccount( __DIR__.'/../../conn/mehailo-20200620-7ce45a69fcdd.json' );
 $messaging = $factory->createMessaging();
 
 $deviceToken = 'dpVIu_ZU9Ek:APA91bFQDoXIBsDhuGiMmb08xIyov1y32_JYGC8ky-qMo-Zk6DFKSBuCtI8XNFN54KyeUsTOQo2Z0CYwV76CerkR4t98dIMSNNI5vu2NsAvH7ClbIDPEbihEbov5fRhWu6wJ99zWrAek';
