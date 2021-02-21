@@ -211,10 +211,10 @@ class DatabaseManager {
 			$stmt->execute(array(
 				'uid' => $obj->uid,
 				'title' => $obj->title,
-				'regopen' => $obj->regopen,
-				'regclose' => $obj->regclose,
-				'trialstart' => $obj->trialstart,
-				'trialend' => $obj->trialend,
+				'regopen' => substr($obj->regopen, 0, 23),
+				'regclose' => substr($obj->regclose, 0, 23),
+				'trialstart' => substr($obj->trialstart, 0, 23),
+				'trialend' => substr($obj->trialend, 0, 23),
 				'trialtype' => $obj->trialtype,
 				'timezone' => $obj->timezone
 			));
@@ -266,9 +266,9 @@ class DatabaseManager {
 					'sid' => $survey->survey_id,
 					'name' => $survey->survey_name,
 					'groups' => json_encode($survey->survey_groups),
-					'pre' => $survey->survey_pre,
-					'during' => $survey->survey_during,
-					'post' => $survey->survey_post,
+					'pre' => ($survey->survey_pre ? 1 : 0 ),
+					'during' => ($survey->survey_during ? 1 : 0 ),
+					'post' => ($survey->survey_post ? 1 : 0 ),
 					'interval' => $survey->survey_interval,
 					'frequency' => $survey->survey_frequency
 				));
