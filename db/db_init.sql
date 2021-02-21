@@ -150,3 +150,18 @@ CREATE TABLE `answers` (
   FOREIGN KEY (`tid`,`sid`,`qid`)
   REFERENCES questions(`tid`,`sid`,`qid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- DEFINE FIREBASE LOGS TABLE
+-- STORES TIMESTAMP, UUID, GROUP (at that time), TRIAL, SURVEY,
+-- last time there is a recorded answer from that user for that survey
+-- and the firebase response after attempting to send the message
+CREATE TABLE `f6e_logs` (
+  `timestamp` TIMESTAMP NOT NULL,
+  `uid` VARCHAR(36) NOT NULL,
+  `group` SMALLINT NOT NULL,
+  `tid` VARCHAR(4) NOT NULL,
+  `sid` SMALLINT NOT NULL,
+  `last_answer` DATE NOT NULL,
+  `f6e_response` TEXT NOT NULL,
+  PRIMARY KEY (`timestamp`,`uid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
