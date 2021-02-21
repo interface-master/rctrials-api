@@ -23,7 +23,7 @@ UNLOCK TABLES;
 --
 
 LOCK TABLES `trials` WRITE;
-INSERT INTO `trials` VALUES ('6fdc','5a56233d-6c77-11ea-85b6-42010a800005','MEHAILO Trial Dev','2020-01-01 05:00:00','2120-01-01 05:00:00','2020-01-01 05:00:00','2120-01-01 05:00:00','simple','America/Toronto','0000-00-00 00:00:00','2020-07-02 10:13:55');
+INSERT INTO `trials` VALUES ('6fdc','5a56233d-6c77-11ea-85b6-42010a800005','MEHAILO Trial Dev','2020-01-01 05:00:00','2120-01-01 05:00:00','2020-01-01 05:00:00','2120-01-01 05:00:00','simple','America/Toronto','1970-01-01 00:00:01','2020-07-02 10:13:55');
 UNLOCK TABLES;
 
 --
@@ -41,7 +41,7 @@ UNLOCK TABLES;
 --
 
 LOCK TABLES `surveys` WRITE;
-INSERT INTO `surveys` VALUES ('6fdc',0,'Demographics','','[0,1]',1,0,0,1,'days'),('6fdc',1,'PHQ-4','Over the last 2 weeks, how often have you been bothered by any of the following problems?','[0,1]',0,1,0,7,'days');
+INSERT INTO `surveys` VALUES ('6fdc',0,'Demographics','Your answers to the following questions is only used in aggregate to better understand our users. It is never shared or used to link to you personally.','[0,1]',1,0,0,1,'days'),('6fdc',1,'PHQ-4','Over the last 2 weeks, how often have you been bothered by any of the following problems?','[0,1]',0,1,0,7,'days');
 UNLOCK TABLES;
 
 --
