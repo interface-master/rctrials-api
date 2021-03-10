@@ -2,6 +2,7 @@
 
 namespace RCTrials;
 
+
 class DatabaseManager {
 	protected static $instance = null;
 

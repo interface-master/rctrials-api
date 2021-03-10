@@ -81,6 +81,7 @@ _Windows:_
 ```
 > docker run --name=rctrials_db -v C:\RCTrials\db\db_init.sql:/docker-entrypoint-initdb.d/00_db_init.sql -v C:\RCTrials\db\db_sample_6fdc.sql:/docker-entrypoint-initdb.d/10_db_populate.sql -e TZ=America/Chicago -e MYSQL_ALLOW_EMPTY_PASSWORD=no -e MYSQL_ROOT_PASSWORD=rooot -e MYSQL_DATABASE=rctrials -e MYSQL_USER=rctrials-db-user -e MYSQL_PASSWORD=rctrials-db-pass -p 3307:3306 -d mariadb:10.5
 ```
+
 Note the mapping of the `db_init.sql` file is different depending on the host environment.
 
 Running `docker ps` should now display the running `rctrials_db` container. To validate the initialization you can run:
