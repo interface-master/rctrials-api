@@ -14,25 +14,25 @@ class DatabaseManager {
 
 	public static function getInstance() {
 		if (!isset(static::$instance)) {
-      try {
-        $options = [
-          \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
-        ];
-        $dbConnInfo = file_get_contents( __DIR__ . "/../../../conn/dbconn.json");
-  			$obj = json_decode($dbConnInfo, true);
-  			$host = $obj['host'];
-  			$port = $obj['port'];
-  			$dbname = $obj['dbname'];
-  			$user = $obj['user'];
-  			$pass = $obj['pass'];
-  			$conn = "mysql:host=$host;dbname=$dbname;port=$port;charset=utf8mb4;";
-  			// instantiate
-  			static::$instance = new DatabaseManager();
-  			self::$instance->dbh = new \PDO( $conn, $user, $pass, $options );
-        // self::$instance->dbh->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-      } catch ( \Exception $err ) {
-        return null;
-      }
+			try {
+				$options = [
+					\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+				];
+				$dbConnInfo = file_get_contents( __DIR__ . "/../../../conn/dbconn.json");
+				$obj = json_decode($dbConnInfo, true);
+				$host = $obj['host'];
+				$port = $obj['port'];
+				$dbname = $obj['dbname'];
+				$user = $obj['user'];
+				$pass = $obj['pass'];
+				$conn = "mysql:host=$host;dbname=$dbname;port=$port;charset=utf8mb4;";
+				// instantiate
+				static::$instance = new DatabaseManager();
+				self::$instance->dbh = new \PDO( $conn, $user, $pass, $options );
+				// self::$instance->dbh->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+			} catch ( \Exception $err ) {
+				return null;
+			}
 		}
 		return static::$instance;
 	}
@@ -94,10 +94,10 @@ class DatabaseManager {
 				FROM `trials`
 				WHERE `regopen` <= NOW()
 				AND (
-        `regclose` > NOW()
-        OR
-        `regclose` = 0
-        )
+					`regclose` > NOW()
+					OR
+					`regclose` = 0
+				)
 				AND `tid` = :tid;"
 			);
 			$stmt->execute(array(
@@ -115,12 +115,12 @@ class DatabaseManager {
 				);
 				$stmt->execute(array(
 					'tid' => $tid,
-          'token' => $firebase_token
+					'token' => $firebase_token
 				));
 				$stmt = $this->dbh->prepare(
 					"SELECT `s`.`id` AS `uid`, `s`.`group`
-					   FROM `subjects` AS `s`
-					  WHERE `s`.`id` = @UID;"
+						 FROM `subjects` AS `s`
+						WHERE `s`.`id` = @UID;"
 				);
 				$stmt->execute();
 				$subject = $stmt->fetch(\PDO::FETCH_OBJ);
