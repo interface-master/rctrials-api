@@ -694,5 +694,19 @@ $app->post( API_ROOT.'/trial/{tid}/survey/{sid}',
 	}
 );
 
+// SUBJECT PUSH NOTIFICATION OPT
+$app->post( API_ROOT.'/settings',
+	function( Request $request, Response $response, array $args ) use ( $app ) {
+		$output = new \stdClass();
+		$uid = $request->getParam('uuid');
+		$opt = $request->getParam('opt');
+		// output
+		$output = $this->db->setSubjectNotifiationPreference( $uid, $opt );
+		$response = $response->withHeader( 'Content-type', 'application/json' );
+		$response = $response->withJson( $output );
+		return $response;
+	}
+);
+
 
 $app->run();

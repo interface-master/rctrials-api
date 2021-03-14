@@ -816,6 +816,45 @@ class DatabaseManager {
 		}
 	}
 
+	/**
+	 *
+	 */
+	public function setSubjectNotifiationPreference( $uid, $opt ) {
+		$output = new \stdClass();
+		if( strlen($uid) == 36 ) {
+			if( $opt == null || is_numeric($opt) == false ) {
+				$opt = 0;
+			} else if ( $opt < 0 ) {
+				$opt = 0;
+			} else if ( $opt > 0 ) {
+				$opt = 1;
+			}
+			try {
+				$stmt = $this->dbh->prepare(
+					"UPDATE `subjects`
+					SET `f6e_opt` = :opt
+					WHERE `id` = :uid;"
+				);
+				$res = $stmt->execute(array(
+					'uid' => $uid,
+					'opt' => $opt,
+				));
+				$output->status = 200;
+				$output->opt = $opt;
+			} catch( PDOException $e ) {
+				$output->status = $e->getCode();
+				$output->error = $e->getMessage();
+			}
+		} else {
+			// bad input
+			$output->status = 500;
+			$output->error = "Bad input.";
+		}
+		return $output;
+	}
+
+
+
 	// public function getCursor() {
 	// 	$stmt = $this->dbh->prepare(
 	// 		"SELECT * FROM users WHERE true LIMIT 3"
