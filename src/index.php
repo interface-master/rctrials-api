@@ -96,6 +96,15 @@ $container = $app->getContainer();
 // set up us the database
 $container['db'] = DatabaseManager::getInstance();
 
+// helper function for setting response header and status
+function setHeaders(Response $response, $output) {
+  $response = $response->withHeader( 'Content-type', 'application/json' );
+  $response = $response->withStatus( $output->status );
+  unset( $output->status );
+  $response = $response->withJson( $output );
+  return $response;
+}
+
 
 // CORS
 $app->options('/{routes:.+}', function ($request, $response, $args) {
@@ -702,8 +711,7 @@ $app->post( API_ROOT.'/settings',
 		$opt = $request->getParam('opt');
 		// output
 		$output = $this->db->setSubjectNotifiationPreference( $uid, $opt );
-		$response = $response->withHeader( 'Content-type', 'application/json' );
-		$response = $response->withJson( $output );
+		$response = setHeaders($response, $output);
 		return $response;
 	}
 );

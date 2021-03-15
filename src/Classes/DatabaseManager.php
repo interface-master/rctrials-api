@@ -821,6 +821,7 @@ class DatabaseManager {
 	 */
 	public function setSubjectNotifiationPreference( $uid, $opt ) {
 		$output = new \stdClass();
+		$output->setting = new \stdClass();
 		if( strlen($uid) == 36 ) {
 			if( $opt == null || is_numeric($opt) == false ) {
 				$opt = 0;
@@ -840,7 +841,8 @@ class DatabaseManager {
 					'opt' => $opt,
 				));
 				$output->status = 200;
-				$output->opt = $opt;
+				$output->setting->updated = 1;
+				$output->setting->opt = $opt;
 			} catch( PDOException $e ) {
 				$output->status = $e->getCode();
 				$output->error = $e->getMessage();
