@@ -609,9 +609,10 @@ $app->post( API_ROOT.'/register/{tid}',
 	function( Request $request, Response $response, array $args ) use ( $app ) {
 		$output = new \stdClass();
 		$tid = $args['tid'];
+		$opt_research = $request->getParam('opt_research');
 		$firebase_token = $request->getParam('token');
 		// output
-		$output = $this->db->newSubject( $tid, $firebase_token );
+		$output = $this->db->newSubject( $tid, $opt_research, $firebase_token );
 		if( $output->status !== 200 ) {
 			$response = $response->withStatus( $output->status );
 		}

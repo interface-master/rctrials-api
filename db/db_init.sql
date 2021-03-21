@@ -22,7 +22,7 @@ CREATE TABLE `subjects` (
   `id` VARCHAR(36) NOT NULL,
   `tid` VARCHAR(4) NOT NULL,
   `group` SMALLINT DEFAULT NULL,
-  `research_opt` TINYINT(1) DEFAULT TRUE,
+  `research_opt` TINYINT(1) NOT NULL DEFAULT 0,
   `f6e_opt` TINYINT(1) DEFAULT TRUE,
   `f6e_token` TEXT DEFAULT NULL,
   `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -32,6 +32,7 @@ CREATE TABLE `subjects` (
 -- CREATE A TRIGGER TO BUCKET SUBJECTS INTO GROUPS
 -- orders ascending by a random value multiplied by the number of subjects in that group already
 -- helps skew randomness towards groups with smaller counts
+DROP TRIGGER IF EXISTS `subjects_before_insert`;
 DELIMITER //
 CREATE TRIGGER `subjects_before_insert` BEFORE INSERT ON `subjects`
 FOR EACH ROW BEGIN
@@ -42,7 +43,10 @@ FOR EACH ROW BEGIN
     WHERE `tid` = new.tid
     ORDER BY (RAND()*(SELECT COUNT(*) FROM `subjects` WHERE `tid` = new.tid AND `group`=`gid`)) ASC
     LIMIT 1);
-  SET new.group = rnd_grp;
+  SET new.group = CASE
+    WHEN new.research_opt = 0 THEN null
+    ELSE rnd_grp
+  END;
 END;//
 DELIMITER ;
 

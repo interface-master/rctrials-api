@@ -84,7 +84,7 @@ class DatabaseManager {
 		return $ret;
 	}
 
-	public function newSubject( $tid, $firebase_token ) {
+	public function newSubject( $tid, $opt_research, $firebase_token ) {
 		// return value
 		$ret = new \stdClass();
 		try {
@@ -109,12 +109,13 @@ class DatabaseManager {
 				$this->dbh->exec("SET @UID = UUID();");
 				$stmt = $this->dbh->prepare(
 					"INSERT INTO
-					`subjects` ( id, tid, f6e_token )
+					`subjects` ( id, tid, research_opt, f6e_token )
 					VALUES
-					( @UID, :tid, :token );"
+					( @UID, :tid, :opt, :token );"
 				);
 				$stmt->execute(array(
 					'tid' => $tid,
+					'opt' => $opt_research,
 					'token' => $firebase_token
 				));
 				$stmt = $this->dbh->prepare(
