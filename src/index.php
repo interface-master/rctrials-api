@@ -1,5 +1,7 @@
 <?php
 
+// sleep(2);
+
 require './vendor/autoload.php';
 
 use \Psr\Http\Message\ServerRequestInterface as Request;
