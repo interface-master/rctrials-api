@@ -128,7 +128,7 @@ class DatabaseManager {
 				// get pre-test surveys
 				$stmt = $this->dbh->prepare(
 					"SELECT
-						`tid`, `sid`, `name`
+						`tid`, `sid`, `name`, `time`, `intro`
 					FROM
 						`surveys`
 					WHERE
@@ -689,7 +689,7 @@ class DatabaseManager {
 		$stmt = $this->dbh->prepare(
 			"SELECT * FROM (
 				SELECT
-					`s`.`tid`, `s`.`sid`, `s`.`name`, `s`.`intro`,
+					`s`.`tid`, `s`.`sid`, `s`.`name`, `s`.`time`, `s`.`intro`,
 					`s`.`pre`, `s`.`post`, `s`.`during`, `s`.`interval`, `s`.`frequency`,
 					COUNT(`a`.`uid`) AS `answers`
 				FROM

@@ -119,6 +119,7 @@ CREATE TABLE `surveys` (
   `tid` VARCHAR(4) NOT NULL,
   `sid` SMALLINT NOT NULL,
   `name` VARCHAR(20) NOT NULL,
+  `time` SMALLINT DEFAULT NULL,
   `intro` TEXT DEFAULT NULL,
   `groups` VARCHAR(20) NOT NULL,
   `pre` BOOLEAN DEFAULT FALSE,
@@ -157,6 +158,7 @@ CREATE TABLE `answers` (
   FOREIGN KEY (`tid`,`sid`,`qid`)
   REFERENCES questions(`tid`,`sid`,`qid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 -- DEFINE FIREBASE LOGS TABLE
 -- STORES TIMESTAMP, UUID, GROUP (at that time), TRIAL, SURVEY,
