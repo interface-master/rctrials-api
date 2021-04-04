@@ -41,11 +41,11 @@ UNLOCK TABLES;
 --
 
 LOCK TABLES `surveys` WRITE;
-INSERT INTO `surveys` VALUES ('6fdc',0,'Demographics','Your answers to the following questions are only used in aggregate to better understand our users. It is never shared or used to link to you personally.','[0,1]',1,0,0,1,'days'),
-('6fdc',1,'Sports Motivation','Why do you play sports or engage in physical activities?\n\nUsing the scale below, please indicate to what extent each of the following items corresponds to one of the reasons for which you are presently engaged in physical activities.','[0,1]',1,0,0,1,'days'),
-('6fdc',2,'Wellbeing','Over the last 2 weeks, how often have you been bothered by any of the following problems?','[0,1]',0,1,0,7,'days'),
-('6fdc',3,'Sports Motivation','Why do you play sports or engage in physical activities?\n\nUsing the scale below, please indicate to what extent each of the following items corresponds to one of the reasons for which you are presently engaged in physical activities.','[0,1]',0,0,1,1,'days'),
-('6fdc',4,'App Usability','Using the scale below, please indicate how was your experience using the Mehailo App?','[0,1]',0,0,1,1,'days');
+INSERT INTO `surveys` VALUES ('6fdc',0,'Demographics',2,'Your answers to the following questions are only used in aggregate to better understand our users. It is never shared or used to link to you personally.','[0,1]',1,0,0,1,'days'),
+('6fdc',1,'Sports Motivation',2,'Why do you play sports or engage in physical activities?\n\nUsing the scale below, please indicate to what extent each of the following items corresponds to one of the reasons for which you are presently engaged in physical activities.','[0,1]',1,0,0,1,'days'),
+('6fdc',2,'Wellbeing',1,'Over the last 2 weeks, how often have you been bothered by any of the following problems?','[0,1]',0,1,0,7,'days'),
+('6fdc',3,'Sports Motivation',1,'Why do you play sports or engage in physical activities?\n\nUsing the scale below, please indicate to what extent each of the following items corresponds to one of the reasons for which you are presently engaged in physical activities.','[0,1]',0,0,1,1,'days'),
+('6fdc',4,'App Usability',1,'Using the scale below, please indicate how was your experience using the Mehailo App?','[0,1]',0,0,1,1,'days');
 UNLOCK TABLES;
 
 --
