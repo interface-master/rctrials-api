@@ -1,3 +1,3 @@
 <?php
 
-DEFINE( 'VERSION', '2.0.4' );
+DEFINE( 'VERSION', '2.1.0' );
