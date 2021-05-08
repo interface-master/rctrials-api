@@ -691,7 +691,9 @@ class DatabaseManager {
 				SELECT
 					`s`.`tid`, `s`.`sid`, `s`.`name`, `s`.`time`, `s`.`intro`,
 					`s`.`pre`, `s`.`post`, `s`.`during`, `s`.`interval`, `s`.`frequency`,
-					COUNT(`a`.`uid`) AS `answers`
+					COUNT(`a`.`uid`) AS `answers`,
+					DATEDIFF( `t`.`trialend`, `t`.`trialstart` ) AS `dur_trial`,
+					DATEDIFF( NOW(), `u`.`created` ) AS `dur_registration`
 				FROM
 					`subjects` AS `u`
 				INNER JOIN
@@ -739,7 +741,8 @@ class DatabaseManager {
 					`s`.`tid`, `s`.`sid`, `a`.`uid`
 			) AS `x`
 			WHERE
-				`x`.`answers` < 1;"
+				`x`.`answers` < 1
+			AND `x`.`dur_registration` >= `x`.`dur_trial`;"
 		);
 		$stmt->execute(array(
 			'uid' => $uid,
