@@ -17,7 +17,7 @@ echo "\n";
 $linecounter++;
 
 // firebase authentication
-$factory = (new Factory)->withServiceAccount( __DIR__.'/../../conn/mehailo-20200620-7ce45a69fcdd.json' );
+$factory = (new Factory)->withServiceAccount( __DIR__.'/../../conn/mehailo21-firebase-adminsdk-wkujx-0d1f21edf1.json' );
 $messaging = $factory->createMessaging();
 
 // connect to database
@@ -38,6 +38,8 @@ try {
 } catch ( \Exception $err ) {
   return null;
 }
+
+// // // SENDING SURVEY NOTIFICATION
 
 // select all firebase tokens
 // that have progress surveys
@@ -65,7 +67,9 @@ $sql = "SELECT `s`.`id` AS `subject`, `s`.`tid`, `s`.`group`, `f6e_token`,
                     AND `v`.`sid`=`ans`.`sid`
                 )
           WHERE `f6e_token` IS NOT NULL
-            AND DATEDIFF( NOW(), `ans`.`answers_date` ) > `v`.`interval`;";
+            AND DATEDIFF( NOW(), `ans`.`answers_date` ) > `v`.`interval`
+    LIMIT 1
+    ;";
 
 $stmt = $dbh->prepare( $sql );
 $stmt->execute();
@@ -81,7 +85,9 @@ foreach( $tokens as $key => $token ) {
 
   echo logformat($linecounter) . " : " . $log->timestamp . " : " . $log->uid . " : " . $log->group . " : " . $log->tid . " : " . $log->sid . " : " . $log->last_answer . "\n";
 
-  $deviceToken = 'eg1wBZmeRkWeWYxHL7folx:APA91bEcNfH1ErH9fWfkO9kQWtbNjsMONx8BBSVrVrpAWpi7RuTAcP37hVokT74w8e4Se34EpvhNtOACz1g2E_70TYsAWb-2oHy5W6Zg_LSs31wylBMDrcePTz0fCTYBl0ZbxDfHMV-l'; //$token->f6e_token;
+  // NOTE: overriding deviceToken to NOT SEND to ACTUAL USERS
+  // TODO: remove in production after testing
+  $deviceToken = 'cl5aChADRhmyWBpwlc46-E:APA91bGcmRIBEzMyme7aLPREYxLsL2AvMGJ9jCeTZWNk0tdDBdHrfnBBLFW37gqYwmDbSppvBRu6yzlzZsPbXv-K7o_9Sbgry2BTGQZ8Kdiwj6w3OxYsUq2NMqZxNAgrzcl2wnBv-aoq'; //$token->f6e_token;
   $msgTitle = 'Mehailo Survey';
   $msgBody = 'Please take 30 seconds (really, we timed it) to fill out a survey and help our research!';
   $notification = Notification::create( $msgTitle, $msgBody );
@@ -96,14 +102,14 @@ foreach( $tokens as $key => $token ) {
     $reply = $messaging->send( $message );
     $log->response = "OK:" . $reply['name'];
   } catch ( Kreait\Firebase\Exception\Messaging\NotFound $e ) {
-    $log->response = "Requested entity was not found.";
+    $log->response = "Requested entity was not found.\n$deviceToken";
     // remove token from db
     $update_token_sql = "UPDATE `subjects` SET `f6e_token` = NULL WHERE `id` = :uid";
     $stmt = $dbh->prepare( $update_token_sql );
-    $stmt->execute(array(
-      'uid' => $log->uid
-    ));
-    $log->response = $log->response . " Removed.";
+    //$stmt->execute(array(
+    //  'uid' => $log->uid
+    //));
+    $log->response = $log->response . "\nRemoved.";
   } catch ( Exception $e ) {
     echo "ERROR: <br/>\n";
     $log->response = $e->getMessage();
