@@ -9,6 +9,7 @@
 --
 
 USE `rctrials`;
+SET names 'utf8';
 
 --
 -- Dumping data for table `users`
