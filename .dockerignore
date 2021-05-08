@@ -4,7 +4,7 @@
 configs/apache2
 configs/php
 configs/conn/dbconn.cloud.json
-configs/conn/mehailo-20200620-7ce45a69fcdd.json
+configs/conn/mehailo21-firebase-adminsdk-wkujx-0d1f21edf1.json
 
 db
 
