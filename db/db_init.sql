@@ -170,7 +170,7 @@ CREATE TABLE `f6e_logs` (
   `group` SMALLINT NOT NULL,
   `tid` VARCHAR(4) NOT NULL,
   `sid` SMALLINT NOT NULL,
-  `last_answer` DATE NOT NULL,
+  `last_answer` DATE DEFAULT NULL,
   `f6e_response` TEXT NOT NULL,
   PRIMARY KEY (`timestamp`,`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
