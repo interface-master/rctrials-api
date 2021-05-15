@@ -67,7 +67,12 @@ $sql = "SELECT `s`.`id` AS `subject`, `s`.`tid`, `s`.`group`, `f6e_token`,
                     AND `v`.`sid`=`ans`.`sid`
                 )
           WHERE `f6e_token` IS NOT NULL
-            AND DATEDIFF( NOW(), `ans`.`answers_date` ) > `v`.`interval`
+            AND
+            (
+              DATEDIFF( NOW(), `ans`.`answers_date` ) > `v`.`interval`
+              OR
+              DATEDIFF( NOW(), `ans`.`answers_date` ) IS NULL
+            )
     LIMIT 1
     ;";
 
