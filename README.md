@@ -103,6 +103,31 @@ Running the following should show you the initialized table structure:
 > show tables
 ```
 
+###### export
+
+Exporting data from one db container for import into another.
+Doesn't work to import file directly if done in Windows, so need to import manually into a running container.
+
+First, dump data from existing container:
+```
+> docker exec mehailo_db /usr/bin/mysqldump -u root --password=rooot mehailo > db.mehailo.yyyy.mm.dd.sql
+```
+Stop and destroy current container:
+```
+> docker stop mehailo_db
+> docker rm mehailo_db
+```
+Start new one:
+```
+> docker run --name=mehailo_db -v C:\MEHAILO\Database\mhl-db-init.sql:/docker-entrypoint-initdb.d/00_db_init.sql -v C:\MEHAILO\Database\mhl-db-tables.sql:/docker-entrypoint-initdb.d/10_db_tables.sql -v C:\MEHAILO\Database\mhl-db-views.sql:/docker-entrypoint-initdb.d/20_db_views.sql -v C:\MEHAILO\Database\mhl-db-challenges.sql:/docker-entrypoint-initdb.d/30_db_challenges.sql -e TZ=GMT -e MYSQL_ALLOW_EMPTY_PASSWORD=no -e MYSQL_ROOT_PASSWORD=rooot -e MYSQL_DATABASE=mehailo -e MYSQL_USER=mehailo-db-user -e MYSQL_PASSWORD=mehailo-db-pass -p 3308:3306 -d mariadb:10.5
+```
+
+Import data:
+_Windows:_
+```
+> type .\db.mehailo.2020.12.15.50users38days.sql | docker exec -i mehailo_db2 mysql -u root --password=rooot mehailo
+```
+
 ###### app
 
 Execute the following command to build the `app` service:
@@ -128,6 +153,10 @@ to attach an app to an existing db container initiated by `docker-compose` you w
 > docker run --name=mehailo_app -p 8082:80 -p 8445:443 --link mehailo_db.internal.app_1 --net mehailo_default -v C:\MEHAILO\Source\AppServer\:/var/www/html -d mehailo_app:latest
 ```
 
+```
+docker run --name=mehailo_dev -p 8082:80 -p 4444:443 --link mehailo_db:db -v C:\MEHAILO\Source\AppServer\:/var/www/html  -d mehailo_app:dev
+```
+
 
 Running `docker ps` should now display the running `rctrials_app` container. To validate the initialization you can run:
 ```
@@ -138,6 +167,17 @@ Running the following will validate the connection to the database:
 > apt-get install -y iputils-ping
 > ping db
 ```
+
+
+Rebuild local:
+```
+> docker build -t mehailo_app:dev .
+```
+Rerun local connecting to docker-compose db:
+```
+> docker run --name=mehailo_app -p 8445:443 -v C:\MEHAILO\Source\AppServer\:/var/www/html --link mehailo_db_1:db --net mehailo_default -d mehailo_app:dev
+```
+
 
 ## Deploying to Cloud
 
