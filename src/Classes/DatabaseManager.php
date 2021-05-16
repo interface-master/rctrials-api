@@ -709,11 +709,11 @@ class DatabaseManager {
 						AND
 						FIND_IN_SET(`g`.`gid`, SUBSTRING( `s`.`groups`, 2, length(`s`.`groups`)-2 )) <> 0
 						AND
-						IF( NOW() < `t`.`trialstart`, `s`.`pre` = 1, 1)
+						IF( NOW() < `t`.`trialstart`, `s`.`pre` = 1, `s`.`pre` = 0 )
 						AND
-						IF( (`t`.`trialend` != 0 AND NOW() > `t`.`trialend`), `s`.`post` = 1, 1)
+						IF( ( DATEDIFF( NOW(), `u`.`created` ) > DATEDIFF( `t`.`trialend`, `t`.`trialstart` ) ), `s`.`post` = 1, `s`.`post` = 0 )
 						AND
-						IF( NOW() > `t`.`trialstart` AND (NOW() < `t`.`trialend` OR `t`.`trialend` = 0), `s`.`during` = 1, 1 )
+						IF( NOW() > `t`.`trialstart` AND (NOW() < `t`.`trialend` OR `t`.`trialend` = 0 OR ( DATEDIFF( NOW(), `u`.`created` ) <= DATEDIFF( `t`.`trialend`, `t`.`trialstart` ) )), `s`.`during` = 1, 1 )
 					)
 				LEFT JOIN
 					`answers` AS `a`
@@ -741,8 +741,7 @@ class DatabaseManager {
 					`s`.`tid`, `s`.`sid`, `a`.`uid`
 			) AS `x`
 			WHERE
-				`x`.`answers` < 1
-			AND `x`.`dur_registration` >= `x`.`dur_trial`;"
+				`x`.`answers` < 1;"
 		);
 		$stmt->execute(array(
 			'uid' => $uid,
