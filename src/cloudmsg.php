@@ -1,5 +1,7 @@
 <?php
 
+chdir(__DIR__);
+
 require './vendor/autoload.php';
 
 use Kreait\Firebase\Factory;
@@ -81,7 +83,11 @@ $sql = "SELECT `s`.`id` AS `subject`, `s`.`tid`, `s`.`group`, `f6e_token`,
                  OR
                  DATEDIFF( NOW(), `ans`.`answers_date` ) IS NULL
                )
-           AND ( DATEDIFF( NOW(), `log`.`sent_date` ) > 1 )
+           AND (
+                 DATEDIFF( NOW(), `log`.`sent_date` ) > 1
+                 OR
+                 DATEDIFF( NOW(), `log`.`sent_date` ) IS NULL
+               )
     -- LIMIT 1 -- FOR DEBUGGING ONLY
     ;";
 
