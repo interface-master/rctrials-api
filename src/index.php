@@ -100,11 +100,11 @@ $container['db'] = DatabaseManager::getInstance();
 
 // helper function for setting response header and status
 function setHeaders(Response $response, $output) {
-  $response = $response->withHeader( 'Content-type', 'application/json' );
-  $response = $response->withStatus( $output->status );
-  unset( $output->status );
-  $response = $response->withJson( $output );
-  return $response;
+	$response = $response->withHeader( 'Content-type', 'application/json' );
+	$response = $response->withStatus( $output->status );
+	unset( $output->status );
+	$response = $response->withJson( $output );
+	return $response;
 }
 
 
@@ -699,7 +699,11 @@ $app->post( API_ROOT.'/trial/{tid}/survey/{sid}',
 		$answers = $request->getParam('answers');
 		// output
 		$output->uuid = $uid;
-		$output->success = $this->db->saveSurveyAnswers( $uid, $tid, $sid, $answers );
+		$output->answers = $this->db->saveSurveyAnswers( $uid, $tid, $sid, $answers );
+		// $output->success = $output->answers->status;
+		// $output->params = $output->answers->params;
+		// $output->answers = $output->answers->answers;
+		// unset( $output->answers->status );
 		// $output->answers = $answers;
 		$response = $response->withHeader( 'Content-type', 'application/json' );
 		$response = $response->withJson( $output );

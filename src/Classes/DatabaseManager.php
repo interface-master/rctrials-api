@@ -200,23 +200,29 @@ class DatabaseManager {
 					`uid`, `title`,
 					`regopen`, `regclose`,
 					`trialstart`, `trialend`,
-					`trialtype`,`timezone`
+					`trialtype`,`timezone`,
+					`created`
 				)
 				VALUES
 				(
 					:uid, :title,
 					:regopen, :regclose,
 					:trialstart, :trialend,
-					:trialtype, :timezone
+					:trialtype, :timezone,
+					NOW()
 				);"
 			);
+			$regclosedate = substr($obj->regclose, 0, 23);
+			if( $regclosedate == '' ) $regclosedate = '3000-01-01';
+			$trialend = substr($obj->regclose, 0, 23);
+			if( $trialend == '' ) $trialend = '3000-01-01';
 			$stmt->execute(array(
 				'uid' => $obj->uid,
 				'title' => $obj->title,
 				'regopen' => substr($obj->regopen, 0, 23),
-				'regclose' => substr($obj->regclose, 0, 23),
+				'regclose' => $regclosedate,
 				'trialstart' => substr($obj->trialstart, 0, 23),
-				'trialend' => substr($obj->trialend, 0, 23),
+				'trialend' => $trialend,
 				'trialtype' => $obj->trialtype,
 				'timezone' => $obj->timezone
 			));
@@ -251,6 +257,23 @@ class DatabaseManager {
 					'size_n' => $group->group_size_n
 				));
 				$ret->groups++;
+			}
+			// insert features
+			$ret->features = 0;
+			foreach( $obj->features as $key => $feature ) {
+				$stmt = $this->dbh->prepare(
+					"INSERT INTO
+					`features`
+					( `tid`, `fid`, `name` )
+					VALUES
+					( :tid, :fid, :name )"
+				);
+				$stmt->execute(array(
+					'tid' => $ret->tid,
+					'fid' => $feature->feature_id,
+					'name' => $feature->feature_name
+				));
+				$ret->features++;
 			}
 			// insert surveys
 			$ret->surveys = 0;
@@ -788,7 +811,10 @@ class DatabaseManager {
 	 *
 	 */
 	public function saveSurveyAnswers( $uid, $tid, $sid, $answers ) {
+		$retval = new \stdClass();
 		try {
+			// $retval->answers = array();
+			// $retval->params = array();
 			foreach( $answers as $key => $answerAry ) {
 				$answer = (object) $answerAry;
 				$ary = [ $answer->answer ]; // start with one item in array
@@ -803,7 +829,7 @@ class DatabaseManager {
 					VALUES
 					( :tid, :sid, :qid, :uid, :answer );"
 				);
-				foreach( $ary as $text ) {
+				foreach( $ary as $key => $text ) {
 					$res = $stmt->execute(array(
 						'tid' => $tid,
 						'sid' => $sid,
@@ -811,11 +837,23 @@ class DatabaseManager {
 						'uid' => $uid,
 						'answer' => $text
 					));
+					/*
+					array_push( $retval->answers, $res );
+					array_push( $retval->params, array(
+						"tid" => $tid,
+						"sid" => $sid,
+						"uid" => $uid,
+						"qid" => $answer->qid,
+						"answer" => $text,
+					));
+					*/
 				}
 			}
-			return true;
+			$retval->status = true;
+			return $retval;
 		} catch( PDOException $e ) {
-			return false;
+			$retval->status = false;
+			return $retval;
 		}
 	}
 
