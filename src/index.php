@@ -699,14 +699,16 @@ $app->post( API_ROOT.'/trial/{tid}/survey/{sid}',
 		$answers = $request->getParam('answers');
 		// output
 		$output->uuid = $uid;
-		$output->answers = $this->db->saveSurveyAnswers( $uid, $tid, $sid, $answers );
+		$savedAnswers = $this->db->saveSurveyAnswers( $uid, $tid, $sid, $answers );
+		$output->answers = $savedAnswers->answers;
+		$output->status = $savedAnswers->status;
+		$output->success = $savedAnswers->success;
 		// $output->success = $output->answers->status;
 		// $output->params = $output->answers->params;
 		// $output->answers = $output->answers->answers;
 		// unset( $output->answers->status );
 		// $output->answers = $answers;
-		$response = $response->withHeader( 'Content-type', 'application/json' );
-		$response = $response->withJson( $output );
+		$response = setHeaders($response, $output);
 		return $response;
 	}
 );

@@ -709,6 +709,10 @@ class DatabaseManager {
 	 */
 	public function getSubjectSurveys( $uid, $tid ) {
 		// get surveys
+    /*
+
+    */
+
 		$stmt = $this->dbh->prepare(
 			"SELECT * FROM (
 				SELECT
@@ -736,7 +740,7 @@ class DatabaseManager {
 						AND
 						IF( ( DATEDIFF( NOW(), `u`.`created` ) > DATEDIFF( `t`.`trialend`, `t`.`trialstart` ) ), `s`.`post` = 1, `s`.`post` = 0 )
 						AND
-						IF( NOW() > `t`.`trialstart` AND (NOW() < `t`.`trialend` OR `t`.`trialend` = 0 OR ( DATEDIFF( NOW(), `u`.`created` ) <= DATEDIFF( `t`.`trialend`, `t`.`trialstart` ) )), `s`.`during` = 1, 1 )
+						IF( NOW() > `t`.`trialstart` AND (NOW() < `t`.`trialend` OR `t`.`trialend` = 0 OR ( DATEDIFF( NOW(), `u`.`created` ) <= DATEDIFF( `t`.`trialend`, `t`.`trialstart` ) ) ), `s`.`during` = 1, 1 )
 					)
 				LEFT JOIN
 					`answers` AS `a`
@@ -813,8 +817,9 @@ class DatabaseManager {
 	public function saveSurveyAnswers( $uid, $tid, $sid, $answers ) {
 		$retval = new \stdClass();
 		try {
-			// $retval->answers = array();
+			$retval->answers = array();
 			// $retval->params = array();
+
 			foreach( $answers as $key => $answerAry ) {
 				$answer = (object) $answerAry;
 				$ary = [ $answer->answer ]; // start with one item in array
@@ -837,8 +842,8 @@ class DatabaseManager {
 						'uid' => $uid,
 						'answer' => $text
 					));
+					array_push( $retval->answers, $answer );
 					/*
-					array_push( $retval->answers, $res );
 					array_push( $retval->params, array(
 						"tid" => $tid,
 						"sid" => $sid,
@@ -849,10 +854,12 @@ class DatabaseManager {
 					*/
 				}
 			}
-			$retval->status = true;
+			$retval->status = 200;
+			$retval->success = true;
 			return $retval;
 		} catch( PDOException $e ) {
-			$retval->status = false;
+			$retval->status = 500;
+			$retval->success = false;
 			return $retval;
 		}
 	}
